@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Stock from './Components/Stock/Stock'
 
 function App() {
   const [message, setMessage] = useState(''); // Hold response from backend
@@ -14,7 +15,8 @@ function App() {
 
   return (
     <div className="App">
-      <p>Portfolio Manager</p>
+      <Stock stockName="AAPL"/>
+      <Stock stockName="AMZN"/>
     </div>
   );
 }
