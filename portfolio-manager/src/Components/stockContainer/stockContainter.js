@@ -2,7 +2,7 @@ import React from 'react';
 import './stockContainer.css';
 import Stock from '../Stock/Stock.js';
 
-const Container = () => {
+const StockContainer = () => {
     // TODO: populate stockNames with stocks that the user owns
     const stockNames = ['APPL', 'AMZN', 'MSFT', 'GOOGL', 'NVDA', 'TSLA'];
     
@@ -15,4 +15,4 @@ const Container = () => {
     );
 };
 
-export default Container;
+export default StockContainer;

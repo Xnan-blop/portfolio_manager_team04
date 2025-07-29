@@ -11,3 +11,9 @@ html, body, #root {
   text-align: center;
   background-color: rgb(24, 7, 60);
 }
+
+.containers{
+  padding-top: 10px;
+  display: flex;
+  gap: 20px;
+}

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Container from './Components/stockContainer/stockContainter.js';
+import StockContainer from './Components/stockContainer/stockContainter.js';
 import Header from './Components/Header/Header.js';
+import GraphContainer from './Components/GraphContainer/graphContainer.js';
 
 function App() {
   const [message, setMessage] = useState(''); // Hold response from backend
@@ -17,7 +18,12 @@ function App() {
   return (
     <div className="App">
       <Header />
-      <Container />
+
+      <div className='containers'>
+        <StockContainer/>
+        <GraphContainer/>
+      </div>
+      
     </div>
   );
 }
