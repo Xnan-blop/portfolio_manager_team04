@@ -3,12 +3,12 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
-  const [message, setMessage] = useState(''); // Hold response from backend
+  const [stocks, setStocks] = useState([]); // Hold response from backend
 
   useEffect(() => {
-    fetch('/api/hello')
+    fetch('http://localhost:5050/api/stocks')
       .then(res => res.json())
-      .then(data => setMessage(data.message))
+      .then(data => {setStocks(data)})
       .catch(err => console.error('Error fetching from backend:', err));
   }, []);
 
@@ -17,7 +17,9 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Backend says: <strong>{message}</strong>
+          <strong>{stocks.map(stock => (
+            <li key={stock.id}>{stock.symbol}</li>
+          ))}</strong>
         </p>
         <p>
           Edit <code>src/App.js</code> and save to reload.
