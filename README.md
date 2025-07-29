@@ -1,16 +1,15 @@
-# portfolio_manager_team04
-Portfolio manager project repository for team 4
-# Requirements
+# :moneybag: portfolio_manager_team04
+Welcome to the portfolio manager project repository for team 4
+# :page_facing_up: Requirements 
 Backend of this project is done using FLASK  
 Frontend of this project is done by using React.js
 
-install and run flask by running
-(mac)
+install and run flask by running the following in the backendFLASK folder
 ```
 pip install Flask
 python app.py
 ```
-open new terminal window and run
+to see the frontend, open new terminal window and navigate to the portfolio-manager folder and run:
 ```
-npm run start
+npm start
 ```
