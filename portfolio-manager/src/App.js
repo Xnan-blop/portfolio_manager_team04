@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Stock from './Components/Stock/Stock'
+import Container from './Components/Container/Container.js';
 
 function App() {
   const [message, setMessage] = useState(''); // Hold response from backend
@@ -15,8 +15,7 @@ function App() {
 
   return (
     <div className="App">
-      <Stock stockName="AAPL"/>
-      <Stock stockName="AMZN"/>
+      <Container />
     </div>
   );
 }

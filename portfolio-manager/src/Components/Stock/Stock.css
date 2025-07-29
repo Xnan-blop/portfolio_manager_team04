@@ -1,8 +1,9 @@
 .stock{
-    width: 200px;
+    width: 300px;
     height: 50px;
-    outline: 3px solid #a19fa2;
-    background-color: #835db8;
+    outline: 0.1px solid #fff;
+    background-color: rgb(24, 7, 60);
+    margin-bottom: 1.5%;
     
 
     display: flex;
