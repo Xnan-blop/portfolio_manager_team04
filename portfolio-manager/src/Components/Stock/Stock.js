@@ -1,11 +1,11 @@
 import React from 'react';
 import './Stock.css';
 
-const Stock = ({stockName}) => {
+const Stock = ({stockName, ClickHandler}) => {
     return (
-        <div className='stock dark-mode'>
+        <button className='stock dark-mode' onClick={() => ClickHandler()}>
             {stockName}
-        </div>
+        </button>
     );
 };
 
