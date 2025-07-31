@@ -22,7 +22,8 @@ const StockContainer = () => {
     }
 
     return (
-        <div className='container'>
+        <div className='container dark-mode'>
+            <h2>Portfolio Holdings</h2>
             {stockNames.map((name, i) => (
                 <Stock key={i} stockName={name} ClickHandler={() => togglePopup(name)} />
             ))}

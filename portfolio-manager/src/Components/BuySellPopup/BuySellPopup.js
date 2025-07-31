@@ -8,22 +8,28 @@ const BuySellPopup = ({ stockName, closePopup }) => {
         document.getElementById("slide").innerText = e.target.value;
     }
     return (
-        <div className="popup-overlay">
-            <div className="popup">
-                <h2>Stock Information: {stockName}</h2>
-                <h3>Buy Stock</h3>
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="999" class="slider" id="myRange" onChange={handleSliderChange}/>
-                    <p>Quantity: <span id="slide">SELECT</span></p>
+        <div>
+            <div className="popup-side" onClick={closePopup}></div>
+            <div className="popup-overlay">
+                <div className="popup">
+                    <h1>{stockName}</h1>
+                    <h4>Real Time Price: 100</h4>
+                    <h4>holdings: 50</h4>
+                    <h4>Avg purchase price: 150</h4>
+                    <h3>Buy Stock</h3>
+                    <input type="text" id="buy-stock" placeholder="Enter amount" className="popup-input" />
+                    <button className="popup-action">
+                        Buy
+                    </button>
+                    <h3>Sell Stock</h3>
+                    <input type="text" id="sell-stock" placeholder="Enter amount" className="popup-input" />
+                    <button className="popup-action">
+                        Sell
+                    </button>
+                    <button onClick={closePopup} className="popup-close">
+                        Close
+                    </button>
                 </div>
-                <h3>Sell Stock</h3>
-                <input type="text" placeholder="Enter amount" className="popup-input" />
-                <button className="popup-close">
-                    Sell
-                </button>
-                <button onClick={closePopup} className="popup-close">
-                    Close
-                </button>
             </div>
         </div>
     );

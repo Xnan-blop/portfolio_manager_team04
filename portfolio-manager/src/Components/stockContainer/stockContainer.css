@@ -1,11 +1,14 @@
 .container{
     width: 400px;
-    height: 50vh;
+    height: flex;
     background-color: #311b7d;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     
+}
+
+.dark-mode{
+    color: #fff;
 }
