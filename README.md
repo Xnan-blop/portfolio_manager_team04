@@ -11,5 +11,6 @@ python app.py
 ```
 to see the frontend, open new terminal window and navigate to the portfolio-manager folder and run:
 ```
+npm install chart.js react-chartjs-2
 npm start
 ```
