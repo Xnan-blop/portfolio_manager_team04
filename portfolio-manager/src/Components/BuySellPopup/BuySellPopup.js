@@ -2,11 +2,21 @@ import './BuySellPopup.css';
 import React, {useState} from "react";
 
 const BuySellPopup = ({ stockName, closePopup }) => {
-    const [quantity, setQuantity] = useState(0);
-    const handleSliderChange = (e) => {
-        setQuantity(e.target.value);
-        document.getElementById("slide").innerText = e.target.value;
-    }
+    const [stockSymbolEntered, setStockSymbolEntered] = useState('');
+    const handleDelete = async (e) => {
+        e.preventDefault();
+    
+        const res = await fetch('http://127.0.0.1:5050/api/stocks/delete_by_symbol', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ symbol: stockSymbolEntered })
+        });
+    
+        const data = await res.json();
+        alert(data.message);
+      };
     return (
         <div>
             <div className="popup-side" onClick={closePopup}></div>
@@ -22,8 +32,8 @@ const BuySellPopup = ({ stockName, closePopup }) => {
                         Buy
                     </button>
                     <h3>Sell Stock</h3>
-                    <input type="text" id="sell-stock" placeholder="Enter amount" className="popup-input" />
-                    <button className="popup-action">
+                    <input type="text" id="sell-stock" placeholder="Enter amount" className="popup-input" value={stockSymbolEntered} onChange={(e) => setStockSymbolEntered(e.target.value)}/>
+                    <button className="popup-action" onClick = {handleDelete}>
                         Sell
                     </button>
                     <button onClick={closePopup} className="popup-close">

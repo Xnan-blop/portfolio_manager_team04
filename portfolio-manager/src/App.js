@@ -15,6 +15,27 @@ function App() {
       .catch(err => console.error('Error fetching from backend:', err));
   }, []);
 
+  const AddStock = () => {
+    const [stockName, setStockName] = useState('');
+    const [quantity, setQuantity] = useState(0);
+    const [purchasePrice, setPurchasePrice] = useState(0);
+    const [Symbol, setSymbol] = useState('');
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const response = await fetch('http://http://127.0.0.1:5050/api/stocks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: stockName, quantity: parseInt(quantity), purchasePrice: parseFloat(purchasePrice), symbol: Symbol })
+      });
+  
+      const data = await response.json();
+      console.log(data.message);
+    }
+  }
+
   return (
     <div className="App">
       <Header />
