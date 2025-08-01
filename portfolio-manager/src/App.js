@@ -6,12 +6,12 @@ import Header from './Components/Header/Header.js';
 import GraphContainer from './Components/GraphContainer/graphContainer.js';
 
 function App() {
-  const [message, setMessage] = useState(''); // Hold response from backend
+  const [stocks, setStocks] = useState([]); // Hold response from backend
 
-   useEffect(() => {
-    fetch('/api/hello')
+  useEffect(() => {
+    fetch('http://localhost:5050/api/stocks')
       .then(res => res.json())
-      .then(data => setMessage(data.message))
+      .then(data => {setStocks(data)})
       .catch(err => console.error('Error fetching from backend:', err));
   }, []);
 
@@ -38,13 +38,13 @@ function App() {
 
   return (
     <div className="App">
+
       <Header />
 
       <div className='containers'>
         <StockContainer/>
         <GraphContainer/>
       </div>
-      
     </div>
   );
 }

@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from models import db, Stock
@@ -119,7 +118,6 @@ def delete_stock_by_symbol():
         return jsonify({"message": f"Sold {quantity_to_delete} of stock '{symbol}', remaining: {stock.quantity}"}), 200
 
 
-    
 
 if __name__ == '__main__':
     app.run(port=5050, debug=True)
