@@ -109,17 +109,41 @@ git clone https://github.com/Xnan-blop/portfolio_manager_team04.git
 
 # 2. Backend setup
 cd backendFLASK
-python -m venv venv              # Create YOUR virtual environment
-venv\Scripts\activate            # Activate it
+
+# CREATE your own virtual environment (one-time setup)
+python -m venv venv              # Creates a new virtual environment folder
+# This creates: backendFLASK/venv/ with a clean Python installation
+
+# ACTIVATE the virtual environment (every time you work)
+venv\Scripts\activate            # Windows
+# source venv/bin/activate       # macOS/Linux
+
+# Your terminal prompt changes to show the environment is active:
+# (venv) PS C:\...\backendFLASK>
+
+# INSTALL project dependencies (one-time after creating venv)
 pip install flask flask-sqlalchemy flask-cors yfinance
 
-# 3. Frontend setup  
-cd ../portfolio-manager
-npm install                      # Downloads dependencies locally
+# RUN the backend
+python app.py
 
-# 4. Run both servers
-# Terminal 1: python app.py      (backend on :5050)
-# Terminal 2: npm start          (frontend on :3000)
+# When you're done working, DEACTIVATE (optional)
+deactivate
+```
+
+### Virtual Environment Lifecycle:
+```bash
+# Day 1 - First time setup:
+python -m venv venv          # Create environment (takes 30 seconds)
+venv\Scripts\activate        # Activate it
+pip install flask ...        # Install dependencies (takes 2 minutes)
+
+# Day 2+ - Every other time:
+venv\Scripts\activate        # Just activate (instant)
+python app.py               # Run your project
+
+# The virtual environment folder persists on your computer
+# You don't recreate it - just reactivate it when working
 ```
 
 ### Database Independence
@@ -132,6 +156,104 @@ Your Setup:                   My Setup:                    Teammate's Setup:
 ```
 
 **Everyone uses the same CODE, but different DATA** ✅
+
+---
+
+## 🗄️ Database Creation & Management
+
+### How Database Creation Works
+
+The database is **NOT created every time you restart the backend**. Here's exactly what happens:
+
+#### First Time You Run Backend:
+```python
+# In app.py, this code runs:
+with app.app_context():
+    db.create_all()  # Creates tables IF they don't exist
+    # Initialize account with $100,000 if it doesn't exist
+    if not Account.query.first():
+        account = Account(balance=100000.0)
+        db.session.add(account)
+        db.session.commit()
+```
+
+**What This Does:**
+1. **Checks**: "Does `stocks.db` file exist?"
+2. **If NO**: Creates database file with empty tables + $100,000 account
+3. **If YES**: Uses existing database with your current data
+
+#### Every Subsequent Run:
+```
+Day 1: python app.py  → Creates stocks.db with $100,000
+Day 2: python app.py  → Uses existing stocks.db with your data
+Day 3: python app.py  → Uses existing stocks.db with your data
+```
+
+**Your database persists between runs!** 🎯
+
+### Database File Location:
+```
+backendFLASK/
+├── app.py
+├── models.py
+├── venv/ (your virtual environment - not tracked)
+└── instance/
+    └── stocks.db (your personal database - not tracked)
+```
+
+### What Gets Created Automatically:
+
+#### Tables Structure (One-time):
+```sql
+-- Account table (always has exactly 1 row)
+CREATE TABLE account (
+    id INTEGER PRIMARY KEY,
+    balance REAL NOT NULL
+);
+
+-- Stock table (grows as you buy stocks)
+CREATE TABLE stock (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    symbol VARCHAR(10) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    quantity INTEGER NOT NULL,
+    purchase_price REAL NOT NULL
+);
+```
+
+#### Initial Data (One-time):
+```sql
+-- This only happens if no account exists
+INSERT INTO account (balance) VALUES (100000.0);
+```
+
+### Database Lifecycle Example:
+
+```bash
+# Fresh clone - no database exists
+git clone https://github.com/Xnan-blop/portfolio_manager_team04.git
+cd backendFLASK
+
+# First run - database gets created
+python app.py
+# Database created: stocks.db
+# Account table: [id=1, balance=100000.0]
+# Stock table: (empty)
+
+# You buy some stocks through the UI...
+# Account table: [id=1, balance=85000.0]
+# Stock table: [AAPL, 10 shares, $150], [GOOGL, 5 shares, $2500]
+
+# Stop backend (Ctrl+C), restart later
+python app.py
+# Database still exists with your data!
+# Account table: [id=1, balance=85000.0]  ← Your balance preserved
+# Stock table: Your stocks are still there
+
+# Database only gets recreated if you delete the file:
+rm instance/stocks.db  # Delete database file
+python app.py          # Now it creates fresh database with $100,000
+```
 
 ---
 
@@ -162,6 +284,62 @@ Your Setup:                   My Setup:                    Teammate's Setup:
 - **Total Portfolio Value**: Cash + Current stock values
 
 ---
+
+## 🔄 Your Original Experience vs. New Setup
+
+### What Happened When You First Cloned (The Accident):
+
+```bash
+# You cloned and it included:
+git clone → Downloaded 8,000+ files including:
+├── backendFLASK/venv/ (complete virtual environment)
+├── backendFLASK/instance/stocks.db (my personal database)
+└── All Python packages pre-installed
+
+# You could immediately run:
+cd backendFLASK
+python app.py  # Worked immediately because:
+               # ✅ Virtual environment was already there
+               # ✅ All packages were pre-installed  
+               # ✅ Database file was included
+```
+
+**Why It "Just Worked":**
+- You got my entire development environment
+- My database with my data
+- All dependencies pre-installed
+- No setup required
+
+**Why This Was Wrong:**
+- 8,000+ unnecessary files
+- You got my personal portfolio data
+- Huge repository size
+- Not how real development works
+
+### How It Works Now (The Correct Way):
+
+```bash
+# Fresh clone gives you only source code:
+git clone → Downloads only:
+├── backendFLASK/app.py (source code)
+├── backendFLASK/models.py (database schema)
+├── portfolio-manager/src/ (React components)
+└── .gitignore (rules to exclude generated files)
+
+# You must set up your own environment:
+cd backendFLASK
+python -m venv venv      # Create YOUR virtual environment
+venv\Scripts\activate    # Activate it
+pip install flask ...    # Install dependencies in YOUR environment
+python app.py           # Creates YOUR database with fresh $100,000
+```
+
+**This Is Professional Because:**
+- ✅ Clean separation of code vs. generated files
+- ✅ Each developer has their own data
+- ✅ Fast repository cloning
+- ✅ No conflicts between environments
+- ✅ Industry standard practice
 
 ## 🔄 Merge Conflict Resolution
 
@@ -209,6 +387,26 @@ git pull origin main
 - **Missing dependencies**: Recreate virtual environment
 - **Port conflicts**: Ensure backend is on 5050, frontend on 3000
 - **CORS errors**: Make sure backend is running first
+
+### 5. Common Virtual Environment Questions
+
+**Q: Do I need to create a virtual environment every time?**
+A: No! Create once, activate every time you work.
+
+**Q: What if I forget to activate the virtual environment?**
+A: You'll get "ModuleNotFoundError: No module named 'flask'" because the packages are installed in the virtual environment, not globally.
+
+**Q: Can I delete the venv folder?**
+A: Yes, it's just on your local computer. You can always recreate it with `python -m venv venv` and reinstall packages.
+
+**Q: Why does my terminal show (venv)?**
+A: This indicates your virtual environment is active. It's a good thing!
+
+**Q: Do I commit the venv folder to Git?**
+A: NO! That's what .gitignore prevents. Virtual environments are personal and not shared.
+
+**Q: What if someone updates the dependencies?**
+A: They would update requirements.txt or the README, then you'd run `pip install <new-package>` in your activated environment.
 
 ---
 
