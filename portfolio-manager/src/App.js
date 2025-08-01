@@ -42,11 +42,10 @@ function App() {
     }
   }
 
+
   return (
     <div className="App">
-
       <Header refreshKey={refreshKey} />
-
       <div className='containers'>
         <StockContainer refreshData={refreshData}/>
         <GraphContainer/>
