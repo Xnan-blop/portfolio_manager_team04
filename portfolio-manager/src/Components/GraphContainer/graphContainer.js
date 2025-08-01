@@ -17,9 +17,9 @@ const GraphContainer = () => {
     chartInstanceRef.current = new Chart(ctx, {
       type: "line",
       data: {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
         datasets: [{
-          data: [7, 8, 8, 9, 4, 9, 10],
+          data: [7, 8, 8, 9, 4, 9, 10, null],
           fill: false,
           borderColor: "rgba(0,0,255,1.0)",
           tension: 0.1

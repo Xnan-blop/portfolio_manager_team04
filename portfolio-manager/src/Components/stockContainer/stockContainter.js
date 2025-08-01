@@ -8,7 +8,7 @@ const StockContainer = () => {
     const [stockNames, setStockNames] = useState([]);
     const [error, setError] = useState(null);
     useEffect(() => {
-        fetch('http://127.0.0.1:5050/api/stocks')  // your Flask route
+        fetch('http://127.0.0.1:5050/api/stocks')
           .then(res => {
             if (!res.ok) throw new Error('Failed to fetch stock names');
             return res.json();
@@ -40,11 +40,15 @@ const StockContainer = () => {
             {stockNames.map((stock) => (
                 <Stock
                     key={stock.id || stock.symbol}
-                    stockName={stock.symbol} // ← pass string, not full object
-                    ClickHandler={() => togglePopup(stock.symbol)} // pass full object if needed
+                    stockName={stock.symbol} 
+                    ClickHandler={() => togglePopup(stock.symbol)}
                 />
                 ))}
-            {isPopupOpen && <BuySellPopup stockName={selectedStock} closePopup={closePopup} />}
+            <Stock
+                stockName="Add Stock"
+                ClickHandler={() => togglePopup("Add Stock")}
+            />
+            {isPopupOpen && <BuySellPopup stockSymbol={selectedStock} closePopup={closePopup} />}
         </div>
     );
 };
