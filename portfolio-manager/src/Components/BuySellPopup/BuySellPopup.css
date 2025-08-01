@@ -104,3 +104,89 @@
     cursor: pointer;
     border-radius: 50%;
 }
+
+/* Ownership Section Styles */
+.ownership-section {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    width: 100%;
+    color: white;
+}
+
+.ownership-section h3 {
+    margin: 0 0 15px 0;
+    color: #c6baef;
+    text-align: center;
+}
+
+.ownership-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.ownership-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.ownership-item .label {
+    font-size: 0.9em;
+    color: #c6baef;
+    font-weight: 500;
+}
+
+.ownership-item .value {
+    font-weight: bold;
+    color: white;
+}
+
+.ownership-item .value.profit {
+    color: #4CAF50;
+}
+
+.ownership-item .value.loss {
+    color: #f44336;
+}
+
+/* Account Section Styles */
+.account-section {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    text-align: center;
+    color: white;
+}
+
+.account-section h4 {
+    margin: 5px 0;
+    color: #4CAF50;
+}
+
+.account-section p {
+    margin: 5px 0;
+    color: #c6baef;
+    font-size: 0.9em;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .ownership-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .popup-overlay {
+        width: 100%;
+    }
+    
+    .popup-side {
+        width: 0;
+    }
+}

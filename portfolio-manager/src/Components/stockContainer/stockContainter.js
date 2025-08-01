@@ -3,21 +3,13 @@ import './stockContainer.css';
 import Stock from '../Stock/Stock.js';
 import BuySellPopup from '../BuySellPopup/BuySellPopup.js';
 
-const StockContainer = () => {
+const StockContainer = ({ refreshData }) => {
     // TODO: populate stockNames with stocks that the user owns
     const [stockNames, setStockNames] = useState([]);
     const [error, setError] = useState(null);
     useEffect(() => {
-        fetch('http://127.0.0.1:5050/api/stocks')
-          .then(res => {
-            if (!res.ok) throw new Error('Failed to fetch stock names');
-            return res.json();
-          })
-          .then(data => {
-            setStockNames(data);
-          })
-          .catch(err => setError(err));
-      }, []);
+        fetchStocks();
+    }, []);
 
     const [selectedStock, setSelectedStock] = useState(null);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -32,7 +24,23 @@ const StockContainer = () => {
     const closePopup = () => {
         setIsPopupOpen(false);
         setSelectedStock(null);
+        // Refresh the stock list when popup closes
+        fetchStocks();
+        // Also refresh the parent component data (including header)
+        if (refreshData) refreshData();
     }
+
+    const fetchStocks = () => {
+        fetch('http://127.0.0.1:5050/api/stocks')
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to fetch stock names');
+            return res.json();
+          })
+          .then(data => {
+            setStockNames(data);
+          })
+          .catch(err => setError(err));
+    };
 
     return (
         <div className='container dark-mode'>

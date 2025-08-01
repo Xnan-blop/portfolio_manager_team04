@@ -7,13 +7,18 @@ import GraphContainer from './Components/GraphContainer/graphContainer.js';
 
 function App() {
   const [stocks, setStocks] = useState([]); // Hold response from backend
+  const [refreshKey, setRefreshKey] = useState(0); // Used to trigger refreshes
 
   useEffect(() => {
-    fetch('http://localhost:5050/api/stocks')
+    fetch('http://127.0.0.1:5050/api/stocks')
       .then(res => res.json())
       .then(data => {setStocks(data)})
       .catch(err => console.error('Error fetching from backend:', err));
-  }, []);
+  }, [refreshKey]);
+
+  const refreshData = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   const AddStock = () => {
     const [stockName, setStockName] = useState('');
@@ -23,7 +28,7 @@ function App() {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      const response = await fetch('http://http://127.0.0.1:5050/api/stocks', {
+      const response = await fetch('http://127.0.0.1:5050/api/stocks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -33,16 +38,17 @@ function App() {
   
       const data = await response.json();
       console.log(data.message);
+      refreshData(); // Refresh data after adding stock
     }
   }
 
   return (
     <div className="App">
 
-      <Header />
+      <Header refreshKey={refreshKey} />
 
       <div className='containers'>
-        <StockContainer/>
+        <StockContainer refreshData={refreshData}/>
         <GraphContainer/>
       </div>
     </div>

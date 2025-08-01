@@ -1,19 +1,86 @@
 .header{
     background-color: #311b7d;
     width: 100%;
-    height: 5vh;
+    height: auto;
+    min-height: 5vh;
     margin-bottom: 2vh;
     top: 0;
     position: sticky;
+    padding: 1vh 2vh;
 
     text-align: center;
     align-items: center;
     display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .heading{
-    margin-left: 1vh;
+    margin: 0;
+    font-size: 1.5em;
 }
+
 .dark-mode{
     color: #fff;
+}
+
+.account-info {
+    display: flex;
+    align-items: center;
+    color: #fff;
+}
+
+.balance-section {
+    display: flex;
+    gap: 2vh;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.balance-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+}
+
+.label {
+    font-size: 0.8em;
+    opacity: 0.8;
+    margin-bottom: 0.2vh;
+}
+
+.amount {
+    font-weight: bold;
+    font-size: 1em;
+}
+
+.amount.total {
+    font-size: 1.2em;
+    color: #4CAF50;
+}
+
+.amount.profit {
+    color: #4CAF50;
+}
+
+.amount.loss {
+    color: #f44336;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        height: auto;
+        padding: 1vh;
+    }
+    
+    .balance-section {
+        gap: 1vh;
+        margin-top: 1vh;
+    }
+    
+    .balance-item {
+        min-width: 80px;
+    }
 }
