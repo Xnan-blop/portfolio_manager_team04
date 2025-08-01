@@ -4,6 +4,7 @@ import './App.css';
 import StockContainer from './Components/stockContainer/stockContainter.js';
 import Header from './Components/Header/Header.js';
 import GraphContainer from './Components/GraphContainer/graphContainer.js';
+import Account from './Components/Account/Account.js';
 
 function App() {
   const [stocks, setStocks] = useState([]); // Hold response from backend
@@ -36,11 +37,12 @@ function App() {
     }
   }
 
+
   return (
     <div className="App">
 
       <Header />
-
+      <Account />
       <div className='containers'>
         <StockContainer/>
         <GraphContainer/>

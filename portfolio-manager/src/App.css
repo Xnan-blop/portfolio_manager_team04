@@ -9,6 +9,7 @@ html, body, #root {
   height: 100%;
   text-align: center;
   background-color: rgb(24, 7, 60);
+  gap: 20px;
 }
 
 .containers{
