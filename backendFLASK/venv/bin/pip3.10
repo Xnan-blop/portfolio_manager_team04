@@ -1,4 +1,4 @@
-#!/Users/nanxi/Documents/GitHub/portfolio_manager_team04/venv/bin/python
+#!/Users/nanxi/Documents/GitHub/portfolio_manager_team04/backendFLASK/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

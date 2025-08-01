@@ -1,0 +1,19 @@
+.header{
+    background-color: #311b7d;
+    width: 100%;
+    height: 5vh;
+    margin-bottom: 2vh;
+    top: 0;
+    position: sticky;
+
+    text-align: center;
+    align-items: center;
+    display: flex;
+}
+
+.heading{
+    margin-left: 1vh;
+}
+.dark-mode{
+    color: #fff;
+}

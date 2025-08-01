@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import StockContainer from './Components/stockContainer/stockContainter.js';
+import Header from './Components/Header/Header.js';
+import GraphContainer from './Components/GraphContainer/graphContainer.js';
 
 function App() {
   const [stocks, setStocks] = useState([]); // Hold response from backend
@@ -12,27 +15,36 @@ function App() {
       .catch(err => console.error('Error fetching from backend:', err));
   }, []);
 
+  const AddStock = () => {
+    const [stockName, setStockName] = useState('');
+    const [quantity, setQuantity] = useState(0);
+    const [purchasePrice, setPurchasePrice] = useState(0);
+    const [Symbol, setSymbol] = useState('');
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const response = await fetch('http://http://127.0.0.1:5050/api/stocks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: stockName, quantity: parseInt(quantity), purchasePrice: parseFloat(purchasePrice), symbol: Symbol })
+      });
+  
+      const data = await response.json();
+      console.log(data.message);
+    }
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          <strong>{stocks.map(stock => (
-            <li key={stock.id}>{stock.symbol}</li>
-          ))}</strong>
-        </p>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+      <Header />
+
+      <div className='containers'>
+        <StockContainer/>
+        <GraphContainer/>
+      </div>
     </div>
   );
 }
