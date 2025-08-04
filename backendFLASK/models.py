@@ -32,7 +32,7 @@ class Portfolio(db.Model):
     id = db.Column(db.Integer, primary_key =True)
     symbol = db.Column(db.String(10), nullable=False)
     date = db.Column(db.String(10), nullable=False)
-    closing_price = db.Column(db.Real, nullable=False)
+    closing_price = db.Column(db.Float, nullable=False)
 
     def to_dict(self):
         return {

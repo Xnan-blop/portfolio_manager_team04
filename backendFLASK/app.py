@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from models import db, Stock, Account
+from models import db, Stock, Account, Portfolio
 import yfinance as yf
+import pandas as pd
 
 
 app = Flask(__name__)
@@ -17,6 +18,33 @@ with app.app_context():
         account = Account(balance=100000.0)
         db.session.add(account)
         db.session.commit()
+    
+    # Retrieving stock data for portfolio performance
+    symbols = [s.symbol for s in Stock.query.all()]
+    if not symbols:
+        print("No symbols to update")
+        exit()
+    else:
+        print(symbols)
+
+    price_data = yf.download(symbols, period='1mo')['Close']
+    
+    for date, i in price_data.iterrows():
+        date_str = date.strftime('%Y-%m-%d')
+        for symbol in symbols:
+            price = i.get(symbol)
+
+            if pd.isna(price):
+                continue
+
+            exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
+
+            if not exists:
+                db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
+
+    db.session.commit()
+    print("prices updated")
+
 
 @app.route('/api/stocks/<ticker>')
 def get_stock(ticker):
