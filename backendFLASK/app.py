@@ -24,8 +24,6 @@ with app.app_context():
     if not symbols:
         print("No symbols to update")
         exit()
-    else:
-        print(symbols)
 
     price_data = yf.download(symbols, period='1mo')['Close']
     
@@ -43,9 +41,7 @@ with app.app_context():
                 db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
 
     db.session.commit()
-    print("prices updated")
-
-
+    
 @app.route('/api/stocks/<ticker>')
 def get_stock(ticker):
     stock = yf.Ticker(ticker)
@@ -188,8 +184,6 @@ def add_stock():
         "remaining_balance": account.balance
     }), 201
 
-
-
 @app.route('/api/stocks/delete_by_symbol', methods=['DELETE'])
 def sell_stock():
     """Sell stocks - either partial quantity or all shares"""
@@ -273,6 +267,36 @@ def sell_stock():
             "remaining_shares": stock.quantity
         }), 200
 
+@app.route('/api/portfolio/value', methods=['GET'])
+def get_portfolio_perfromance():
+    stocks = Stock.query.all()
+    if not stocks:
+        return jsonify([]), 200
+
+    # Get all the stocks and their respective holdings
+    current_holdings = {s.symbol: s.quantity for s in stocks}
+    
+    # Get closing prices
+    closing_prices = Portfolio.query.order_by(Portfolio.date).all()
+    
+    value_by_date = {}
+
+    # Calculate the total value of the portfolio at each date
+    for row in closing_prices:
+        if row.symbol not in current_holdings:
+            continue
+        total_value = current_holdings[row.symbol] * row.closing_price
+        if row.date not in value_by_date:
+            value_by_date[row.date] = total_value
+        else:
+            value_by_date[row.date] += total_value
+        
+    res = [
+        {"date": date, "total_value": round(value, 2)}
+        for date, value in sorted(value_by_date.items())
+    ]
+    
+    return jsonify(res), 200
 
 
 if __name__ == '__main__':
