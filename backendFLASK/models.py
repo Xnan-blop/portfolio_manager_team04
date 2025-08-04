@@ -27,3 +27,17 @@ class Stock(db.Model):
             "purchase_price": self.purchase_price,
             "quantity": self.quantity
         }
+
+class Portfolio(db.Model):
+    id = db.Column(db.Integer, primary_key =True)
+    symbol = db.Column(db.String(10), nullable=False)
+    date = db.Column(db.String(10), nullable=False)
+    closing_price = db.Column(db.Real, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id, 
+            "symbol" : self.symbol,
+            "date": self.date,
+            "closing_price": self.closing_price
+        }
