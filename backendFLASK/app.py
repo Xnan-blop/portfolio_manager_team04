@@ -3,7 +3,7 @@ from flask_cors import CORS
 from models import db, Stock, Account, Portfolio
 import yfinance as yf
 import pandas as pd
-
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 CORS(app)
@@ -275,9 +275,11 @@ def get_portfolio_perfromance():
 
     # Get all the stocks and their respective holdings
     current_holdings = {s.symbol: s.quantity for s in stocks}
+
+    cutoff_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
     
     # Get closing prices
-    closing_prices = Portfolio.query.order_by(Portfolio.date).all()
+    closing_prices = Portfolio.query.filter(Portfolio.date >= cutoff_date).order_by(Portfolio.date).all()
     
     value_by_date = {}
 

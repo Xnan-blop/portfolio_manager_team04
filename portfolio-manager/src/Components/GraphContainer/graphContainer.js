@@ -34,10 +34,7 @@ const GraphContainer = () => {
     console.log(portfolioData);
     const x_axis = portfolioData.map(item => item.date);
     const y_axis = portfolioData.map(item => item.total_value);
-    console.log(x_axis);
-    console.log(y_axis);
-    console.log(Math.max(y_axis));
-
+   
     chartInstanceRef.current = new Chart(ctx, {
       type: "line",
       data: {
