@@ -152,6 +152,16 @@ def add_stock():
     # Update account balance
     account.balance -= total_cost
 
+    # Record Transaction
+    transaction = Transactions(
+        symbol=symbol,
+        date=date.today(),
+        type="BUY",
+        quantity=quantity,
+        current_price=purchase_price
+    )
+    db.session.add(transaction)
+
     stock = Stock.query.filter_by(symbol=symbol).first()
     if stock:
         stock.quantity += quantity
@@ -237,6 +247,15 @@ def sell_stock():
         db.session.add(account)
     
     account.balance += sale_proceeds
+
+    # Record Transaction
+    transaction = Transactions(
+        symbol=symbol,
+        date = date.today(),
+        type = "SELL",
+        quantity = quantity_to_sell,
+        current_price = current_price
+    )
 
     # Calculate profit/loss
     purchase_cost = stock.purchase_price * quantity_to_sell
