@@ -261,6 +261,17 @@ def sell_stock():
     purchase_cost = stock.purchase_price * quantity_to_sell
     profit_loss = sale_proceeds - purchase_cost
 
+    # Record Transaction
+    transaction = Transactions(
+        symbol = symbol,
+        date = pd.Timestamp.now().strftime('%Y-%m-%d'),
+        type = "SELL",
+        quantity = quantity_to_sell,
+        purchase_price = current_price
+    )
+
+    db.session.add(transaction)
+
     if stock.quantity == quantity_to_sell:
         # Selling all shares - remove from portfolio
         db.session.delete(stock)
