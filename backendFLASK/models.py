@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import CheckConstraint
 
 db = SQLAlchemy()
 
@@ -29,7 +30,7 @@ class Stock(db.Model):
         }
 
 class Portfolio(db.Model):
-    id = db.Column(db.Integer, primary_key =True)
+    id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(10), nullable=False)
     date = db.Column(db.String(10), nullable=False)
     closing_price = db.Column(db.Float, nullable=False)
@@ -40,4 +41,29 @@ class Portfolio(db.Model):
             "symbol" : self.symbol,
             "date": self.date,
             "closing_price": self.closing_price
+        }
+    
+class Transactions(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    symbol = db.Column(db.String(10), nullable=False)
+    date = db.Column(db.String(10), nullable=False)
+    type = db.Column(db.String(4), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    purchase_price = db.Column(db.Float, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "type IN ('BUY', 'SELL')",
+            name='check_transaction_type_valid'
+        ),
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id, 
+            "symbol" : self.symbol,
+            "date": self.date,
+            "type": self.type,
+            "quantity": self.quantity,
+            "purchase_price": self.purchase_price
         }

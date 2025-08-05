@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from models import db, Stock, Account, Portfolio
+from models import db, Stock, Account, Portfolio, Transactions
 import yfinance as yf
 import pandas as pd
-
+from datetime import datetime, timedelta, date
 
 app = Flask(__name__)
 CORS(app)
@@ -151,6 +151,9 @@ def add_stock():
             return jsonify({
                 "error": f"Insufficient funds. Cost: ${total_cost:.2f}, Available: ${account.balance:.2f}"
             }), 400
+        
+
+        
 
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid data types provided"}), 400
@@ -283,9 +286,11 @@ def get_portfolio_perfromance():
 
     # Get all the stocks and their respective holdings
     current_holdings = {s.symbol: s.quantity for s in stocks}
+
+    cutoff_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
     
     # Get closing prices
-    closing_prices = Portfolio.query.order_by(Portfolio.date).all()
+    closing_prices = Portfolio.query.filter(Portfolio.date >= cutoff_date).order_by(Portfolio.date).all()
     
     value_by_date = {}
 
@@ -305,6 +310,7 @@ def get_portfolio_perfromance():
     ]
     
     return jsonify(res), 200
+    
 
 
 if __name__ == '__main__':
