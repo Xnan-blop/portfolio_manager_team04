@@ -49,7 +49,7 @@ class Transactions(db.Model):
     date = db.Column(db.String(10), nullable=False)
     type = db.Column(db.String(4), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    current_price = db.Column(db.Float, nullable=False)
+    purchase_price = db.Column(db.Float, nullable=False)
 
     __table_args__ = (
         CheckConstraint(
