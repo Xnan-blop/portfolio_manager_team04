@@ -17,3 +17,8 @@ html, body, #root {
   display: flex;
   gap: 20px;
 }
+
+.container-02{
+  margin-right: 20px;
+  display: flex;
+}
