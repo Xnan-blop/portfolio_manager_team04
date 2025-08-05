@@ -79,8 +79,8 @@
 }
 
 .popup-close-icon {
-    position: fixed;
-    left: 510px;
+    position: absolute;
+    left: 2%;
     height: 20px;
     border-radius: 4px;
 }
