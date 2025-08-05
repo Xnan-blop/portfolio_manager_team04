@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import CheckConstraint
+
 
 db = SQLAlchemy()
 
@@ -50,13 +50,6 @@ class Transactions(db.Model):
     type = db.Column(db.String(4), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     purchase_price = db.Column(db.Float, nullable=False)
-
-    __table_args__ = (
-        CheckConstraint(
-            "type IN ('BUY', 'SELL')",
-            name='check_transaction_type_valid'
-        ),
-    )
 
     def to_dict(self):
         return {

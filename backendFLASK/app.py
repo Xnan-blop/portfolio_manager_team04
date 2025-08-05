@@ -152,9 +152,6 @@ def add_stock():
                 "error": f"Insufficient funds. Cost: ${total_cost:.2f}, Available: ${account.balance:.2f}"
             }), 400
         
-
-        
-
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid data types provided"}), 400
     except Exception as e:
@@ -162,6 +159,17 @@ def add_stock():
 
     # Update account balance
     account.balance -= total_cost
+
+    # Record Transaction
+    transaction = Transactions(
+        symbol = symbol,
+        date = pd.Timestamp.now().strftime('%Y-%m-%d'),
+        type = "BUY",
+        quantity = quantity,
+        purchase_price = purchase_price
+    )
+
+    db.session.add(transaction)
 
     stock = Stock.query.filter_by(symbol=symbol).first()
     if stock:
@@ -311,7 +319,16 @@ def get_portfolio_perfromance():
     
     return jsonify(res), 200
     
-
+@app.route('/api/transactions', methods=['GET'])
+def get_transactions():
+    transactions = Transactions.query.all()
+    print(transactions)
+    if not transactions:
+        return jsonify([]), 200
+    
+    transactions_list = [t.to_dict() for t in transactions]
+    
+    return jsonify(transactions_list), 200
 
 if __name__ == '__main__':
     app.run(port=5050, debug=True)
