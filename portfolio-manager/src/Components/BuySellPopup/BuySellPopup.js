@@ -48,7 +48,6 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
                 const priceResponse = await fetch(`http://127.0.0.1:5050/api/search/${symbol}`);
                 const priceData = await priceResponse.json();
                 const currentPrice = priceResponse.ok ? priceData.current_price : ownedStock.purchase_price;
-                
                 const currentValue = currentPrice * ownedStock.quantity;
                 const purchaseValue = ownedStock.purchase_price * ownedStock.quantity;
                 const profitLoss = currentValue - purchaseValue;
@@ -174,6 +173,7 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
             <div className="popup-side" onClick={closePopup}></div>
             <div className="popup-overlay">
                 <div className="popup">
+                    <img src='https://cdn-icons-png.flaticon.com/512/1828/1828778.png' alt='Close' className='popup-close-icon' onClick={closePopup} />
                     {isNewStock ? (
                         <>
                             <h1>Add New Stock</h1>
@@ -186,9 +186,7 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && searchForStock(searchQuery)}
                             />
-                            <button className="popup-action" onClick={() => searchForStock(searchQuery)}>
-                                Search
-                            </button>
+                            <button className="popup-close" onClick={() => searchForStock(searchQuery)}>Search</button>
                             
                             {isLoading && <p>Loading...</p>}
                             {error && <p style={{color: 'red'}}>{error}</p>}
@@ -196,29 +194,108 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
                             {stockInfo && (
                                 <div>
                                     <h2>{stockInfo.name} ({stockInfo.symbol})</h2>
+                                    <h4> Industry: {stockInfo.industry} <br />
+                                    Sector: {stockInfo.sector} <br />
+                                    </h4>
                                     <h4>Current Price: ${stockInfo.current_price.toFixed(2)} {stockInfo.currency}</h4>
+                                    <div className="stock-info">
+                                        <h3>Stock Information</h3>
+                                        <div className="stock-info-grid">
+                                            <div className="stock-info-item">
+                                                <span className="label"> Beta:  </span>
+                                                <span className="value">{stockInfo.beta}</span>
+                                            </div>
+                                            <div className="stock-info-item">
+                                                <span className="label"> Dividend Yield:  </span>
+                                                <span className="value">{stockInfo.dividend_yield}</span>
+                                            </div>
+                                            <div className="stock-info-item">
+                                                <span className="label"> Previous Close:  </span>
+                                                <span className="value">{stockInfo.previous_close}</span>
+                                            </div>
+                                            <div className="stock-info-item">
+                                                <span className="label"> Volume:  </span>
+                                                <span className="value">{stockInfo.volume}</span>
+                                            </div>
+                                            <div className="stock-info-item">
+                                                <span className="label"> PE Ratio:  </span>
+                                                <span className="value">{stockInfo.pe_ratio}</span>
+                                            </div>
+                                            <div className="stock-info-item">
+                                                <span className="label"> EPS:  </span>
+                                                <span className="value">{stockInfo.eps}</span>
+                                            </div>
+                                        </div>
+            
+                                </div>
                                     <div className="account-section">
                                         <h4>Account Balance: ${accountBalance.toFixed(2)}</h4>
                                         {stockNumberBuyEntered > 0 && (
                                             <p>Cost: ${(stockInfo.current_price * stockNumberBuyEntered).toFixed(2)}</p>
                                         )}
                                     </div>
+                                    
                                 </div>
                             )}
                         </>
                     ) : (
                         <>
-                            <h1>{stockSymbol}</h1>
+                            
                             {isLoading ? (
                                 <p>Loading stock info...</p>
                             ) : stockInfo ? (
+                                
                                 <>
-                                    <h4>Real Time Price: ${stockInfo.current_price.toFixed(2)} {stockInfo.currency}</h4>
-                                    <h4>Company: {stockInfo.name}</h4>
+                                    <h1>{stockInfo.name} ({stockSymbol})</h1>
+                                    <h4> Industry: {stockInfo.industry} <br />
+                                    Sector: {stockInfo.sector} <br />
+                                    </h4>
+                                    <h4>
+        
+                                    Real Time Price: ${stockInfo.current_price} {stockInfo.currency}{' '}
+                                    <span style={{ color: stockInfo.current_price - stockInfo.previous_close > 0 ? '#4CAF50' : '#f44336' }}>
+                                        ({(stockInfo.current_price - stockInfo.previous_close > 0 ? '+' : '') +
+                                        (stockInfo.current_price - stockInfo.previous_close).toFixed(2)})
+                                    </span>
+                                    </h4>
                                 </>
                             ) : (
                                 <h4>Loading price data...</h4>
                             )}
+                            {stockInfo && (
+                                <div className="stock-info">
+                                    <h3>Stock Information</h3>
+                                    <div className="stock-info-grid">
+                                        <div className="stock-info-item">
+                                            <span className="label"> Beta:  </span>
+                                            <span className="value">{stockInfo.beta}</span>
+                                        </div>
+                                        <div className="stock-info-item">
+                                            <span className="label"> Dividend Yield:  </span>
+                                            <span className="value">{stockInfo.dividend_yield}</span>
+                                        </div>
+                                        <div className="stock-info-item">
+                                            <span className="label"> Previous Close:  </span>
+                                            <span className="value">{stockInfo.previous_close}</span>
+                                        </div>
+                                        <div className="stock-info-item">
+                                            <span className="label"> Volume:  </span>
+                                            <span className="value">{stockInfo.volume}</span>
+                                        </div>
+                                        <div className="stock-info-item">
+                                            <span className="label"> PE Ratio:  </span>
+                                            <span className="value">{stockInfo.pe_ratio}</span>
+                                        </div>
+                                        <div className="stock-info-item">
+                                            <span className="label"> EPS:  </span>
+                                            <span className="value">{stockInfo.eps}</span>
+                                        </div>
+                                    </div>
+            
+                                </div>
+                            )
+
+                            }
                             
                             {/* Ownership Information */}
                             {ownershipInfo && (
@@ -262,40 +339,41 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
                             </div>
                         </>
                     )}
-                    
-                    {((isNewStock && stockInfo) || !isNewStock) && (
-                        <>
-                            <h3>Buy Stock</h3>
-                            <input 
-                                type="number" 
-                                min="1" 
-                                placeholder="Enter quantity" 
-                                className="popup-input" 
-                                value={stockNumberBuyEntered} 
-                                onChange={(e) => setStockNumberBuyEntered(e.target.value)}
-                            />
-                            <button className="popup-action" onClick={handleAdd}>
-                                Buy
-                            </button>
-                        </>
-                    )}
-                    
-                    {!isNewStock && (
-                        <>
-                            <h3>Sell Stock</h3>
-                            <input 
-                                type="number" 
-                                min="1" 
-                                placeholder="Enter quantity to sell" 
-                                className="popup-input" 
-                                value={stockNumberEntered} 
-                                onChange={(e) => setStockNumberEntered(e.target.value)}
-                            />
-                            <button className="popup-action" onClick={handleDelete}>
-                                Sell
-                            </button>
-                        </>
-                    )}
+                    <div className="action-section">
+                        {((isNewStock && stockInfo) || !isNewStock) && (
+                            <div>
+                                <h3>Buy Stock</h3>
+                                <input 
+                                    type="number" 
+                                    min="1" 
+                                    placeholder="Enter quantity" 
+                                    className="popup-input" 
+                                    value={stockNumberBuyEntered} 
+                                    onChange={(e) => setStockNumberBuyEntered(e.target.value)}
+                                />
+                                <button className="popup-action" onClick={handleAdd}>
+                                    Buy
+                                </button>
+                            </div>
+                        )}
+                        
+                        {!isNewStock && (
+                            <div>
+                                <h3>Sell Stock</h3>
+                                <input 
+                                    type="number" 
+                                    min="1" 
+                                    placeholder="Enter quantity to sell" 
+                                    className="popup-input" 
+                                    value={stockNumberEntered} 
+                                    onChange={(e) => setStockNumberEntered(e.target.value)}
+                                />
+                                <button className="popup-action" onClick={handleDelete}>
+                                    Sell
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     
                     <button onClick={closePopup} className="popup-close">
                         Close

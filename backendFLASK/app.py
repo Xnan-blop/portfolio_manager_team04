@@ -59,13 +59,21 @@ def search_stock(query):
         # Try as ticker first
         ticker = yf.Ticker(query.upper())
         info = ticker.info
-        
         if info and 'symbol' in info:
             return jsonify({
                 'symbol': info.get('symbol', query.upper()),
                 'name': info.get('longName', info.get('shortName', 'Unknown')),
                 'current_price': info.get('currentPrice', info.get('regularMarketPrice', 0)),
-                'currency': info.get('currency', 'USD')
+                'currency': info.get('currency', 'USD'),
+                'previous_close': info.get('previousClose', 0),
+                'industry': info.get('industry', 'N/A'),
+                'sector': info.get('sector', 'N/A'),
+                'beta': info.get('beta', 0),
+                'description': info.get('longBusinessSummary', 'No description available'),
+                'dividend_yield': info.get('dividendYield', 0),
+                'volume': info.get('volume', 0),
+                'pe_ratio': info.get('trailingPE', 0),
+                'eps': info.get('trailingEps', 0),
             })
         else:
             return jsonify({'error': 'Stock not found'}), 404
