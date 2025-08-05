@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from models import db, Stock, Account, Portfolio
+from models import db, Stock, Account, Portfolio, Transactions
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta, date

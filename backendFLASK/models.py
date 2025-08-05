@@ -45,7 +45,7 @@ class Portfolio(db.Model):
     
 class Transactions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.String(10), db.ForeignKey('stocks.id'), nullable=False)
+    symbol = db.Column(db.String(10), nullable=False)
     date = db.Column(db.String(10), nullable=False)
     type = db.Column(db.String(4), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
@@ -53,7 +53,17 @@ class Transactions(db.Model):
 
     __table_args__ = (
         CheckConstraint(
-            "transaction_type IN ('BUY', 'SELL')",
+            "type IN ('BUY', 'SELL')",
             name='check_transaction_type_valid'
         ),
     )
+
+    def to_dict(self):
+        return {
+            "id": self.id, 
+            "symbol" : self.symbol,
+            "date": self.date,
+            "type": self.type,
+            "quantity": self.quantity,
+            "purchase_price": self.purchase_price
+        }
