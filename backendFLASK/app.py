@@ -3,7 +3,7 @@ from flask_cors import CORS
 from models import db, Stock, Account, Portfolio
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 app = Flask(__name__)
 CORS(app)
@@ -299,7 +299,6 @@ def get_portfolio_perfromance():
     ]
     
     return jsonify(res), 200
-
 
 if __name__ == '__main__':
     app.run(port=5050, debug=True)
