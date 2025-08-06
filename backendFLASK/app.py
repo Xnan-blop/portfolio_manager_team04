@@ -3,7 +3,9 @@ from flask_cors import CORS
 from models import db, Stock, Account, Portfolio, Transactions
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta, date, timezone
+from datetime import datetime, timedelta, date
+from collections import defaultdict
+from copy import deepcopy
 
 app = Flask(__name__)
 CORS(app)
@@ -21,24 +23,26 @@ with app.app_context():
     
     # Retrieving stock data for portfolio performance
     symbols = [s.symbol for s in Stock.query.all()]
+    price_data = None
+
     if not symbols:
-        print("No symbols to update - starting with empty portfolio")
-        # Don't exit, just skip the historical data update
-    else:
+        print("No symbols to update, adding default stock to fetch")
+        price_data = yf.download(['GOOGL'], period='1d')['Close']
+    else:   
         price_data = yf.download(symbols, period='1mo')['Close']
-        
-        for date, i in price_data.iterrows():
-            date_str = date.strftime('%Y-%m-%d')
-            for symbol in symbols:
-                price = i.get(symbol)
+    
+    for date, i in price_data.iterrows():
+        date_str = date.strftime('%Y-%m-%d')
+        for symbol in symbols:
+            price = i.get(symbol)
 
-                if pd.isna(price):
-                    continue
+            if pd.isna(price):
+                continue
 
-                exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
+            exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
 
-                if not exists:
-                    db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
+            if not exists:
+                db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
 
     db.session.commit()
     
@@ -310,38 +314,69 @@ def sell_stock():
         }), 200
 
 @app.route('/api/portfolio/value', methods=['GET'])
-def get_portfolio_perfromance():
-    stocks = Stock.query.all()
-    if not stocks:
-        return jsonify([]), 200
+def get_portfolio_performance():
+    transactions = Transactions.query.order_by(Transactions.date).all()
+    portfolio = Portfolio.query.all()
 
-    # Get all the stocks and their respective holdings
-    current_holdings = {s.symbol: s.quantity for s in stocks}
+    all_dates = sorted(set(t.date for t in transactions))
 
-    cutoff_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+    # Group transactions by date for faster access
+    transactions_by_date = defaultdict(list)
+    for t in transactions:
+        transactions_by_date[t.date].append(t)
     
-    # Get closing prices
-    closing_prices = Portfolio.query.filter(Portfolio.date >= cutoff_date).order_by(Portfolio.date).all()
-    
-    value_by_date = {}
+    # get all stocks ever owned from the transactions table
+    stock_quantity_by_symbol = defaultdict(int)
 
-    # Calculate the total value of the portfolio at each date
-    for row in closing_prices:
-        if row.symbol not in current_holdings:
-            continue
-        total_value = current_holdings[row.symbol] * row.closing_price
-        if row.date not in value_by_date:
-            value_by_date[row.date] = total_value
+    closing_prices_by_date = defaultdict(dict)
+    # organize all closing prices for stocks by date
+    for p in portfolio:
+        closing_prices_by_date[p.date][p.symbol] = p.closing_price
+
+    portfolio_by_date = defaultdict(list)
+
+    for date in all_dates:
+        # make a copy of the prev day
+        if portfolio_by_date:
+            last_date = max(d for d in portfolio_by_date if d < date)
+            previous_day = portfolio_by_date[last_date]
+            portfolio_by_date[date] = deepcopy(previous_day)
+        # start with empty if the first day
         else:
-            value_by_date[row.date] += total_value
+            portfolio_by_date[date] = []
         
-    res = [
-        {"date": date, "total_value": round(value, 2)}
-        for date, value in sorted(value_by_date.items())
-    ]
-    
-    return jsonify(res), 200
+        symbol_to_entry = {entry['symbol']: entry for entry in portfolio_by_date[date]}
 
+        for t in transactions_by_date[date]:
+            # update quantity of stock
+            if t.type == "BUY":
+                stock_quantity_by_symbol[t.symbol] += t.quantity
+            elif t.type == "SELL":
+                stock_quantity_by_symbol[t.symbol] -= t.quantity
+
+            quantity = stock_quantity_by_symbol[t.symbol]
+            closing_price = closing_prices_by_date[date].get(t.symbol, None)
+
+            # Update or insert the symbol entry
+            if t.symbol in symbol_to_entry:
+                symbol_to_entry[t.symbol]["quantity"] = quantity
+                symbol_to_entry[t.symbol]["closing_price"] = closing_price
+            else:
+                portfolio_by_date[date].append({
+                    "symbol": t.symbol,
+                    "quantity": quantity,
+                    "closing_price": closing_price
+                })
+        
+        # Remove any stocks with 0 quantity
+        portfolio_by_date[date] = [
+            entry for entry in portfolio_by_date[date]
+            if entry["quantity"] > 0
+        ]
+        
+    return jsonify(portfolio_by_date), 200
+
+    
 @app.route('/api/transactions', methods=['GET'])
 def get_transaction_history():
     """Get all transaction history ordered by date (newest first)"""
