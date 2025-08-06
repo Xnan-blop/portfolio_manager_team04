@@ -19,7 +19,7 @@ function App() {
       <div className='containers'>
         <div className='left-column'>
           <StockContainer refreshData={refreshData}/>
-          <TransactionContainer />
+          <TransactionContainer refreshKey={refreshKey} />
         </div>
         <div className='right-column'>
           <GraphContainer/>

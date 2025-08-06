@@ -1,7 +1,7 @@
 import './BuySellPopup.css';
 import React, {useState, useEffect} from "react";
 
-const BuySellPopup = ({ stockSymbol, closePopup }) => {
+const BuySellPopup = ({ stockSymbol, closePopup, refreshData }) => {
     const [stockNumberEntered, setStockNumberEntered] = useState(0);
     const [stockNumberBuyEntered, setStockNumberBuyEntered] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
@@ -125,6 +125,12 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
             alert(`Error: ${data.error}`);
           } else {
             alert(data.message);
+            // Refresh data immediately after successful transaction
+            if (refreshData) refreshData();
+            // Also refresh transaction history immediately
+            if (window.refreshTransactions) {
+                window.refreshTransactions();
+            }
             closePopup();
           }
     };
@@ -161,6 +167,12 @@ const BuySellPopup = ({ stockSymbol, closePopup }) => {
                 alert(`Error: ${data.error}`);
             } else {
                 alert("Stock added successfully!");
+                // Refresh data immediately after successful transaction
+                if (refreshData) refreshData();
+                // Also refresh transaction history immediately
+                if (window.refreshTransactions) {
+                    window.refreshTransactions();
+                }
                 closePopup();
             }
         } catch (err) {

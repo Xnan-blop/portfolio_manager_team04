@@ -2,6 +2,21 @@
 
 A full-stack portfolio management application with real-time stock data integration, transaction history tracking, and account balance management.
 
+## Tech Stack
+
+### **Backend**
+- **Flask** - Python web framework for API endpoints
+- **SQLAlchemy** - ORM for database operations
+- **SQLite** - Lightweight database for local development
+- **Flask-CORS** - Cross-origin resource sharing for frontend-backend communication
+- **yfinance** - Yahoo Finance API integration for real-time stock data
+
+### **Frontend**
+- **React 18+** - Component-based UI framework
+- **Chart.js** - Data visualization and portfolio charts
+- **CSS3** - Custom styling and responsive design
+- **Fetch API** - HTTP client for backend communication
+
 ## Features
 
 - **Account Balance System**: $100,000 starting balance with buy/sell validation
@@ -71,17 +86,22 @@ Frontend will run on: `http://localhost:3000`
 
 ## Database Schema
 
-The application uses SQLite with automatic initialization:
+The application uses **SQLite** for local development with automatic initialization and schema creation.
 
-### Account Table
+### **Schema Overview**
+The database consists of four main tables that handle all portfolio management functionality:
+
+### **Account Table** - User Balance Management
 ```sql
 CREATE TABLE account (
     id INTEGER PRIMARY KEY,
-    balance REAL NOT NULL
+    balance REAL NOT NULL DEFAULT 100000.0
 );
 ```
+**Purpose**: Tracks available cash for transactions
+**Key Features**: Single record per user, automatically initialized with $100,000
 
-### Stock Table
+### **Stock Table** - Portfolio Holdings
 ```sql
 CREATE TABLE stock (
     id INTEGER PRIMARY KEY,
@@ -91,31 +111,66 @@ CREATE TABLE stock (
     purchase_price REAL NOT NULL
 );
 ```
+**Purpose**: Stores current stock holdings and weighted average purchase prices
+**Key Features**: 
+- Unique symbol entries (quantities are aggregated)
+- Purchase price updated as weighted average on additional purchases
+- Automatic removal when all shares are sold
 
-### Transaction Table
+### **Transaction Table** - Complete Trading History
 ```sql
 CREATE TABLE transaction (
     id INTEGER PRIMARY KEY,
     symbol VARCHAR(10) NOT NULL,
     quantity INTEGER NOT NULL,
-    purchase_price REAL NOT NULL,
-    total_amount REAL NOT NULL,
-    type VARCHAR(4) NOT NULL,  -- 'BUY' or 'SELL'
+    purchase_price REAL NOT NULL,    -- Price per share at time of transaction
+    total_amount REAL NOT NULL,      -- Total transaction value (price × quantity)
+    type VARCHAR(4) NOT NULL,        -- 'BUY' or 'SELL'
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+**Purpose**: Immutable record of all buy/sell transactions
+**Key Features**:
+- Complete audit trail of all trading activity
+- Supports both individual share price and total transaction amount
+- Chronological ordering with precise timestamps
+- Never modified or deleted (permanent history)
 
-**Note**: Database file (`stocks.db`) is automatically created on first run with $100,000 starting balance.
+### **Portfolio Table** - Historical Performance Data
+```sql
+CREATE TABLE portfolio (
+    id INTEGER PRIMARY KEY,
+    symbol VARCHAR(10) NOT NULL,
+    date VARCHAR(10) NOT NULL,
+    closing_price REAL NOT NULL
+);
+```
+**Purpose**: Stores historical daily closing prices for portfolio performance tracking
+**Key Features**: 
+- Populated automatically on application startup
+- 30-day historical data via Yahoo Finance API
+- Used for portfolio performance charts and calculations
+
+### **Database Features:**
+- **Auto-initialization**: Database and tables created automatically on first run
+- **Transaction Safety**: All buy/sell operations are atomic with rollback support
+- **Data Integrity**: Foreign key relationships and constraints ensure data consistency
+- **Local Development**: Each developer gets independent database instance
+- **Reset Capability**: Delete `stocks.db` file to start fresh with clean $100,000 balance
+
+**Note**: Database file (`stocks.db`) is automatically created in `backendFLASK/instance/` directory and is excluded from Git tracking.
 
 ## API Endpoints
 
 ### Base URL: `http://127.0.0.1:5050/api`
 
-#### 1. Get Account Balance
+The backend provides a RESTful API with comprehensive endpoints for portfolio management:
+
+#### 1. Account Management
+**GET /account** - Retrieve current account balance
 ```http
 GET /account
 ```
-
 **Response:**
 ```json
 {
@@ -123,12 +178,13 @@ GET /account
     "id": 1
 }
 ```
+**Used by**: Header, BuySellPopup for balance validation
 
-#### 2. Get All Portfolio Stocks
+#### 2. Portfolio Holdings
+**GET /stocks** - Get all owned stocks in portfolio
 ```http
 GET /stocks
 ```
-
 **Response:**
 ```json
 [
@@ -138,59 +194,37 @@ GET /stocks
         "name": "Apple Inc.",
         "quantity": 10,
         "purchase_price": 150.0
-    },
-    {
-        "id": 2,
-        "symbol": "GOOGL",
-        "name": "Alphabet Inc.",
-        "quantity": 5,
-        "purchase_price": 2500.0
     }
 ]
 ```
+**Used by**: Header (portfolio calculations), StockContainer (holdings display), BuySellPopup (ownership validation)
 
-#### 3. Search Stocks (Live Data)
+#### 3. Stock Search & Live Data
+**GET /search/{query}** - Search stocks with real-time pricing
 ```http
-GET /search?query=apple
+GET /search/AAPL
 ```
-
-**Response:**
-```json
-[
-    {
-        "symbol": "AAPL",
-        "name": "Apple Inc.",
-        "current_price": 175.50
-    },
-    {
-        "symbol": "APLE",
-        "name": "Apple Hospitality REIT Inc.",
-        "current_price": 15.25
-    }
-]
-```
-
-#### 4. Get Stock Details with Live Price
-```http
-GET /stock/<symbol>
-```
-
-**Example:** `GET /stock/AAPL`
-
 **Response:**
 ```json
 {
     "symbol": "AAPL",
     "name": "Apple Inc.",
     "current_price": 175.50,
-    "change": 2.30,
-    "change_percent": 1.33
+    "currency": "USD",
+    "previous_close": 173.20,
+    "industry": "Technology",
+    "sector": "Consumer Electronics",
+    "volume": 45678900,
+    "pe_ratio": 25.4,
+    "eps": 6.90
 }
 ```
+**Used by**: BuySellPopup (stock search, live pricing), StockContainer (current value calculations)
 
-#### 5. Buy Stock
+#### 4. Stock Transactions
+**POST /stocks** - Execute buy orders
 ```http
-POST /buy
+POST /stocks
 Content-Type: application/json
 
 {
@@ -198,26 +232,26 @@ Content-Type: application/json
     "quantity": 10
 }
 ```
-
 **Success Response:**
 ```json
 {
-    "message": "Successfully bought 10 shares of AAPL for $1755.00"
+    "message": "Added new stock 'AAPL' with quantity 10",
+    "stock": { "id": 1, "symbol": "AAPL", "quantity": 10, "purchase_price": 175.50 },
+    "total_cost": 1755.00,
+    "remaining_balance": 98245.00
 }
 ```
-
-**Note**: Buy operations automatically create transaction records in the database.
-
-**Error Response (Insufficient Funds):**
+**Error Response:**
 ```json
 {
-    "error": "Insufficient funds. Need $1755.00 but only have $1000.00"
+    "error": "Insufficient funds. Cost: $1755.00, Available: $1000.00"
 }
 ```
+**Used by**: BuySellPopup for buy transactions
 
-#### 6. Sell Stock
+**DELETE /stocks/delete_by_symbol** - Execute sell orders
 ```http
-POST /sell
+DELETE /stocks/delete_by_symbol
 Content-Type: application/json
 
 {
@@ -225,28 +259,24 @@ Content-Type: application/json
     "quantity": 5
 }
 ```
-
 **Success Response:**
 ```json
 {
-    "message": "Successfully sold 5 shares of AAPL for $877.50"
+    "message": "Sold 5 shares of 'AAPL', remaining: 5",
+    "sale_proceeds": 877.50,
+    "current_price": 175.50,
+    "profit_loss": 127.50,
+    "remaining_balance": 98122.50,
+    "remaining_shares": 5
 }
 ```
+**Used by**: BuySellPopup for sell transactions
 
-**Note**: Sell operations automatically create transaction records in the database.
-
-**Error Response (Insufficient Shares):**
-```json
-{
-    "error": "Cannot sell 10 shares. You only own 5 shares of AAPL"
-}
-```
-
-#### 7. Get Transaction History
+#### 5. Transaction History
+**GET /transactions** - Complete transaction history
 ```http
 GET /transactions
 ```
-
 **Response:**
 ```json
 [
@@ -257,7 +287,7 @@ GET /transactions
         "purchase_price": 175.50,
         "total_amount": 877.50,
         "type": "SELL",
-        "date": "2025-08-06 14:30:15.123456"
+        "date": "2025-08-06T14:30:15.123456"
     },
     {
         "id": 2,
@@ -266,21 +296,39 @@ GET /transactions
         "purchase_price": 150.00,
         "total_amount": 1500.00,
         "type": "BUY",
-        "date": "2025-08-06 10:15:30.654321"
-    },
-    {
-        "id": 1,
-        "symbol": "GOOGL",
-        "quantity": 2,
-        "purchase_price": 2500.00,
-        "total_amount": 5000.00,
-        "type": "BUY",
-        "date": "2025-08-06 09:45:22.987654"
+        "date": "2025-08-06T10:15:30.654321"
     }
 ]
 ```
+**Features**: Ordered by date (newest first), includes complete transaction details
+**Used by**: TransactionContainer for history display
 
-**Note**: Transactions are returned in reverse chronological order (newest first).
+#### 6. Portfolio Performance
+**GET /portfolio/value** - Historical portfolio performance data
+```http
+GET /portfolio/value
+```
+**Response:**
+```json
+[
+    {
+        "date": "2025-08-01",
+        "total_value": 98500.00
+    },
+    {
+        "date": "2025-08-02", 
+        "total_value": 99250.00
+    }
+]
+```
+**Used by**: GraphContainer for performance charts
+
+### **API Features:**
+- **CORS Enabled**: Frontend-backend communication from different ports
+- **Error Handling**: Comprehensive error responses with detailed messages
+- **Input Validation**: Server-side validation for all transactions
+- **Real-time Data**: Live stock prices via Yahoo Finance integration
+- **Transaction Integrity**: Atomic operations for buy/sell with rollback support
 
 ## Calculations
 
@@ -302,6 +350,81 @@ P&L Percentage = (Total P&L / Invested Amount) × 100
 ### Portfolio Allocation
 ```
 Stock Allocation % = (Stock Current Value / Total Current Value) × 100
+```
+
+## Component Architecture & API Integration
+
+### **Component Overview**
+The React frontend is organized into modular components, each responsible for specific functionality and API interactions:
+
+#### **App.js** - Main Application Container
+- **Purpose**: Root component that orchestrates all child components
+- **State Management**: Handles global refresh state across components
+- **Layout**: Manages two-column layout (portfolio data + charts)
+
+#### **Header Component**
+- **Purpose**: Real-time portfolio overview and financial summary
+- **API Endpoints Called**:
+  - `GET /api/account` - Fetches current cash balance
+  - `GET /api/stocks` - Gets all owned stocks for portfolio calculations
+- **Functionality**: 
+  - Displays cash balance, invested amount, total portfolio value
+  - Calculates and displays P&L with color coding (green/red)
+  - Auto-refreshes on transaction completion
+
+#### **StockContainer Component**
+- **Purpose**: Portfolio holdings management and stock list display
+- **API Endpoints Called**:
+  - `GET /api/stocks` - Retrieves all owned stocks
+  - `GET /api/search/{symbol}` - Gets current prices for P&L calculations
+- **Functionality**:
+  - Displays owned stocks with current values
+  - "Buy Stock" button to open transaction modal
+  - Manages popup state for buy/sell operations
+
+#### **TransactionContainer Component**
+- **Purpose**: Complete transaction history with chronological display
+- **API Endpoints Called**:
+  - `GET /api/transactions` - Fetches all transaction records
+- **Functionality**:
+  - Shows buy/sell history in reverse chronological order
+  - Displays transaction details (symbol, quantity, price, total amount, date)
+  - Auto-refreshes when new transactions occur
+  - Real-time updates without manual page refresh
+
+#### **BuySellPopup Component**
+- **Purpose**: Stock trading interface for buy/sell operations
+- **API Endpoints Called**:
+  - `GET /api/search/{query}` - Stock search and live price data
+  - `GET /api/stocks` - Current holdings for sell operations
+  - `GET /api/account` - Account balance validation
+  - `POST /api/stocks` - Execute buy transactions
+  - `DELETE /api/stocks/delete_by_symbol` - Execute sell transactions
+- **Functionality**:
+  - Stock search with live pricing
+  - Buy/sell transaction forms with validation
+  - Ownership details and P&L per stock
+  - Real-time balance and availability checks
+  - Error handling for insufficient funds/shares
+
+#### **GraphContainer Component**
+- **Purpose**: Portfolio visualization and performance charts
+- **API Endpoints Called**:
+  - `GET /api/portfolio/value` - Historical portfolio performance data
+- **Functionality**:
+  - Chart.js integration for data visualization
+  - Portfolio performance over time
+  - Interactive charts and graphs
+
+### **Data Flow Architecture**
+```
+User Action (Buy/Sell) 
+  ↓
+BuySellPopup → API Call → Backend Processing
+  ↓
+Database Update → Auto-refresh Trigger
+  ↓
+Header + StockContainer + TransactionContainer → Refresh Display
 ```
 
 ## UI Components
@@ -351,6 +474,9 @@ Stock Allocation % = (Stock Current Value / Total Current Value) × 100
 2. **API Connection Failed**: Check that backend is on port 5050
 3. **Database Errors**: Delete `stocks.db` to reset with fresh data
 4. **Live Data Not Loading**: Check internet connection for Yahoo Finance API
+5. **Transaction Errors**: If getting `total_amount` errors, ensure database schema is updated (delete and recreate `stocks.db`)
+6. **Duplicate Transactions**: Fixed in latest version - ensure you're using updated backend code
+7. **Transaction History Not Updating**: Auto-refresh functionality added - ensure frontend components are updated
 
 ### Port Configuration
 - Backend: `http://127.0.0.1:5050`

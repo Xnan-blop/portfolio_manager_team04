@@ -63,7 +63,7 @@ const StockContainer = ({ refreshData }) => {
                     ClickHandler={() => togglePopup("Add Stock")}
                 />
             </div>
-            {isPopupOpen && <BuySellPopup stockSymbol={selectedStock} closePopup={closePopup} />}
+            {isPopupOpen && <BuySellPopup stockSymbol={selectedStock} closePopup={closePopup} refreshData={refreshData} />}
         </div>
     );
 };

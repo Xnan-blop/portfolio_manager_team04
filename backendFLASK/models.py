@@ -46,17 +46,19 @@ class Portfolio(db.Model):
 class Transactions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(10), nullable=False)
-    date = db.Column(db.String(10), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     type = db.Column(db.String(4), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     purchase_price = db.Column(db.Float, nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
 
     def to_dict(self):
         return {
             "id": self.id, 
             "symbol" : self.symbol,
-            "date": self.date,
+            "date": self.date.isoformat() if self.date else None,
             "type": self.type,
             "quantity": self.quantity,
-            "purchase_price": self.purchase_price
+            "purchase_price": self.purchase_price,
+            "total_amount": self.total_amount
         }

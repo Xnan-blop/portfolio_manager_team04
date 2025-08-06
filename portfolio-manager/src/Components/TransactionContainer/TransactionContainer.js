@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import './TransactionContainer.css';
 
-const TransactionContainer = () => {
+const TransactionContainer = ({ refreshKey }) => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
-    useEffect(() => {
-        fetchTransactions();
-    }, []);
 
     const fetchTransactions = async () => {
         try {
@@ -27,6 +23,23 @@ const TransactionContainer = () => {
             setLoading(false);
         }
     };
+
+    // Function to refresh transactions
+    const refreshTransactions = useCallback(() => {
+        fetchTransactions();
+    }, []);
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [refreshKey]);
+
+    // Expose refresh function globally for other components to use
+    useEffect(() => {
+        window.refreshTransactions = refreshTransactions;
+        return () => {
+            delete window.refreshTransactions;
+        };
+    }, [refreshTransactions]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

@@ -3,7 +3,7 @@ from flask_cors import CORS
 from models import db, Stock, Account, Portfolio, Transactions
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 
 app = Flask(__name__)
 CORS(app)
@@ -22,23 +22,23 @@ with app.app_context():
     # Retrieving stock data for portfolio performance
     symbols = [s.symbol for s in Stock.query.all()]
     if not symbols:
-        print("No symbols to update")
-        exit()
+        print("No symbols to update - starting with empty portfolio")
+        # Don't exit, just skip the historical data update
+    else:
+        price_data = yf.download(symbols, period='1mo')['Close']
+        
+        for date, i in price_data.iterrows():
+            date_str = date.strftime('%Y-%m-%d')
+            for symbol in symbols:
+                price = i.get(symbol)
 
-    price_data = yf.download(symbols, period='1mo')['Close']
-    
-    for date, i in price_data.iterrows():
-        date_str = date.strftime('%Y-%m-%d')
-        for symbol in symbols:
-            price = i.get(symbol)
+                if pd.isna(price):
+                    continue
 
-            if pd.isna(price):
-                continue
+                exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
 
-            exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
-
-            if not exists:
-                db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
+                if not exists:
+                    db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
 
     db.session.commit()
     
@@ -160,17 +160,6 @@ def add_stock():
     # Update account balance
     account.balance -= total_cost
 
-    # Record Transaction
-    transaction = Transactions(
-        symbol = symbol,
-        date = pd.Timestamp.now().strftime('%Y-%m-%d'),
-        type = "BUY",
-        quantity = quantity,
-        purchase_price = purchase_price
-    )
-
-    db.session.add(transaction)
-
     stock = Stock.query.filter_by(symbol=symbol).first()
     if stock:
         stock.quantity += quantity
@@ -194,13 +183,14 @@ def add_stock():
         db.session.add(stock)
         message = f"Added new stock '{symbol}' with quantity {quantity}"
 
-    # Create transaction record
+    # Create single transaction record
     transaction = Transactions(
         symbol=symbol,
         type='BUY',
         quantity=quantity,
         purchase_price=purchase_price,
-        date=datetime.utcnow()
+        total_amount=total_cost,
+        date=datetime.now(timezone.utc)
     )
     db.session.add(transaction)
 
@@ -271,26 +261,16 @@ def sell_stock():
     purchase_cost = stock.purchase_price * quantity_to_sell
     profit_loss = sale_proceeds - purchase_cost
 
-    # Record Transaction
-    transaction = Transactions(
-        symbol = symbol,
-        date = pd.Timestamp.now().strftime('%Y-%m-%d'),
-        type = "SELL",
-        quantity = quantity_to_sell,
-        purchase_price = current_price
-    )
-
-    db.session.add(transaction)
-
     if stock.quantity == quantity_to_sell:
         # Selling all shares - remove from portfolio
-        # Create transaction record before deleting stock
+        # Create single transaction record before deleting stock
         transaction = Transactions(
             symbol=symbol,
             type='SELL',
             quantity=quantity_to_sell,
             purchase_price=current_price,
-            date=datetime.utcnow()
+            total_amount=sale_proceeds,
+            date=datetime.now(timezone.utc)
         )
         db.session.add(transaction)
         
@@ -314,7 +294,8 @@ def sell_stock():
             type='SELL',
             quantity=quantity_to_sell,
             purchase_price=current_price,
-            date=datetime.utcnow()
+            total_amount=sale_proceeds,
+            date=datetime.now(timezone.utc)
         )
         db.session.add(transaction)
         
