@@ -280,7 +280,7 @@ const BuySellPopup = ({ stockSymbol, closePopup, refreshData }) => {
                                     <div className="stock-info-grid">
                                         <div className="stock-info-item">
                                             <span className="label"> Beta:  </span>
-                                            <span className="value">{stockInfo.beta}</span>
+                                            <span className="value">{stockInfo.beta.toFixed(2)}</span>
                                         </div>
                                         <div className="stock-info-item">
                                             <span className="label"> Dividend Yield:  </span>
@@ -292,11 +292,11 @@ const BuySellPopup = ({ stockSymbol, closePopup, refreshData }) => {
                                         </div>
                                         <div className="stock-info-item">
                                             <span className="label"> Volume:  </span>
-                                            <span className="value">{stockInfo.volume}</span>
+                                            <span className="value">{stockInfo.volume.toLocaleString()}</span>
                                         </div>
                                         <div className="stock-info-item">
                                             <span className="label"> PE Ratio:  </span>
-                                            <span className="value">{stockInfo.pe_ratio}</span>
+                                            <span className="value">{stockInfo.pe_ratio.toFixed(2)}</span>
                                         </div>
                                         <div className="stock-info-item">
                                             <span className="label"> EPS:  </span>
