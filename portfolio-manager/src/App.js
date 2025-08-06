@@ -22,7 +22,7 @@ function App() {
           <TransactionContainer refreshKey={refreshKey} />
         </div>
         <div className='right-column'>
-          <GraphContainer/>
+          <GraphContainer />
         </div>
       </div>
     </div>
