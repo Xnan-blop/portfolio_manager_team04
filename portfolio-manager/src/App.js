@@ -17,11 +17,13 @@ function App() {
     <div className="App">
       <Header refreshKey={refreshKey} />
       <div className='containers'>
-        <StockContainer refreshData={refreshData}/>
-        <GraphContainer/>
-      </div>
-      <div className='container-02'>
-        <TransactionContainer />
+        <div className='left-column'>
+          <StockContainer refreshData={refreshData}/>
+          <TransactionContainer />
+        </div>
+        <div className='right-column'>
+          <GraphContainer/>
+        </div>
       </div>
     </div>
   );

@@ -1,16 +1,17 @@
-# 💰 Portfolio Manager - Team 04
+# Portfolio Manager - Team 04
 
-A full-stack portfolio management application with real-time stock data integration and account balance tracking.
+A full-stack portfolio management application with real-time stock data integration, transaction history tracking, and account balance management.
 
-## 🚀 Features
+## Features
 
 - **Account Balance System**: $100,000 starting balance with buy/sell validation
 - **Live Stock Data**: Real-time pricing via Yahoo Finance API
 - **Portfolio Analytics**: P&L calculations, portfolio allocation percentages
+- **Transaction History**: Complete chronological record of all buy/sell operations
 - **Responsive UI**: Mobile-friendly design with real-time updates
 - **Transaction Management**: Buy and sell stocks with ownership tracking
 
-## 📋 Requirements
+## Requirements
 
 ### Backend Dependencies
 - Python 3.10+
@@ -24,7 +25,7 @@ A full-stack portfolio management application with real-time stock data integrat
 - React 18+
 - Chart.js (for visualization)
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -68,7 +69,7 @@ npm start
 
 Frontend will run on: `http://localhost:3000`
 
-## 🗄️ Database Schema
+## Database Schema
 
 The application uses SQLite with automatic initialization:
 
@@ -91,9 +92,22 @@ CREATE TABLE stock (
 );
 ```
 
+### Transaction Table
+```sql
+CREATE TABLE transaction (
+    id INTEGER PRIMARY KEY,
+    symbol VARCHAR(10) NOT NULL,
+    quantity INTEGER NOT NULL,
+    purchase_price REAL NOT NULL,
+    total_amount REAL NOT NULL,
+    type VARCHAR(4) NOT NULL,  -- 'BUY' or 'SELL'
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
 **Note**: Database file (`stocks.db`) is automatically created on first run with $100,000 starting balance.
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Base URL: `http://127.0.0.1:5050/api`
 
@@ -192,6 +206,8 @@ Content-Type: application/json
 }
 ```
 
+**Note**: Buy operations automatically create transaction records in the database.
+
 **Error Response (Insufficient Funds):**
 ```json
 {
@@ -217,6 +233,8 @@ Content-Type: application/json
 }
 ```
 
+**Note**: Sell operations automatically create transaction records in the database.
+
 **Error Response (Insufficient Shares):**
 ```json
 {
@@ -224,7 +242,47 @@ Content-Type: application/json
 }
 ```
 
-## 🧮 Calculations
+#### 7. Get Transaction History
+```http
+GET /transactions
+```
+
+**Response:**
+```json
+[
+    {
+        "id": 3,
+        "symbol": "AAPL",
+        "quantity": 5,
+        "purchase_price": 175.50,
+        "total_amount": 877.50,
+        "type": "SELL",
+        "date": "2025-08-06 14:30:15.123456"
+    },
+    {
+        "id": 2,
+        "symbol": "AAPL",
+        "quantity": 10,
+        "purchase_price": 150.00,
+        "total_amount": 1500.00,
+        "type": "BUY",
+        "date": "2025-08-06 10:15:30.654321"
+    },
+    {
+        "id": 1,
+        "symbol": "GOOGL",
+        "quantity": 2,
+        "purchase_price": 2500.00,
+        "total_amount": 5000.00,
+        "type": "BUY",
+        "date": "2025-08-06 09:45:22.987654"
+    }
+]
+```
+
+**Note**: Transactions are returned in reverse chronological order (newest first).
+
+## Calculations
 
 ### Portfolio Value
 - **Cash Balance**: Available money for purchases
@@ -246,7 +304,7 @@ P&L Percentage = (Total P&L / Invested Amount) × 100
 Stock Allocation % = (Stock Current Value / Total Current Value) × 100
 ```
 
-## 🎨 UI Components
+## UI Components
 
 ### Header Component
 - Real-time portfolio overview
@@ -255,7 +313,12 @@ Stock Allocation % = (Stock Current Value / Total Current Value) × 100
 
 ### Stock Container
 - List of owned stocks
-- "Add Stock" button for new purchases
+- "Buy Stock" button for new purchases
+
+### Transaction Container
+- Chronological history of all buy/sell transactions
+- Real-time updates when new transactions occur
+- Displays transaction type, symbol, quantity, price, and timestamp
 
 ### Buy/Sell Popup
 - Stock search functionality
@@ -266,7 +329,7 @@ Stock Allocation % = (Stock Current Value / Total Current Value) × 100
 ### Graph Container
 - Portfolio visualization (Chart.js integration)
 
-## 🚨 Important Notes
+## Important Notes
 
 ### Database Management
 - **Database files are NOT tracked in Git** (see `.gitignore`)
@@ -280,7 +343,7 @@ Stock Allocation % = (Stock Current Value / Total Current Value) × 100
 3. Hot reloading enabled for both frontend and backend
 4. Live data refreshes automatically via Yahoo Finance API
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -294,7 +357,7 @@ Stock Allocation % = (Stock Current Value / Total Current Value) × 100
 - Frontend: `http://localhost:3000`
 - Database: SQLite file (`backendFLASK/instance/stocks.db`)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 portfolio_manager_team04/
@@ -310,14 +373,15 @@ portfolio_manager_team04/
 │   │   │   ├── Stock/      # Individual stock display
 │   │   │   ├── BuySellPopup/ # Transaction modal
 │   │   │   ├── stockContainer/ # Portfolio holdings
-│   │   │   └── GraphContainer/ # Charts
+│   │   │   ├── GraphContainer/ # Charts
+│   │   │   └── TransactionContainer/ # Transaction history
 │   │   └── App.js          # Main React component
 │   └── package.json        # Node.js dependencies
 ├── .gitignore              # Git exclusion rules
 └── README.md               # This file
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Pull latest changes: `git pull origin main`
 2. Create feature branch: `git checkout -b feature-name`
