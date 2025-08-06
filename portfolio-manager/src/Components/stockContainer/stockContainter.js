@@ -44,18 +44,25 @@ const StockContainer = ({ refreshData }) => {
 
     return (
         <div className='container dark-mode'>
-            <h2>Portfolio Holdings</h2>
-            {stockNames.map((stock) => (
-                <Stock
-                    key={stock.id || stock.symbol}
-                    stockName={stock.symbol} 
-                    ClickHandler={() => togglePopup(stock.symbol)}
-                />
+            <div className='container-header'>
+                <h2 style={{margin: 0, color: 'white', fontSize: 'var(--title-font-size)', fontWeight: 'var(--title-font-weight)'}}>Portfolio Holdings</h2>
+                <p style={{margin: '5px 0 0 0', color: '#c6baef', fontSize: 'var(--subtitle-font-size)', fontWeight: 'var(--subtitle-font-weight)'}}>
+                    {stockNames.length} {stockNames.length === 1 ? 'holding' : 'holdings'}
+                </p>
+            </div>
+            <div className='container-content'>
+                {stockNames.map((stock) => (
+                    <Stock
+                        key={stock.id || stock.symbol}
+                        stockName={stock.symbol} 
+                        ClickHandler={() => togglePopup(stock.symbol)}
+                    />
                 ))}
-            <Stock
-                stockName="Add Stock"
-                ClickHandler={() => togglePopup("Add Stock")}
-            />
+                <Stock
+                    stockName="Buy Stock"
+                    ClickHandler={() => togglePopup("Add Stock")}
+                />
+            </div>
             {isPopupOpen && <BuySellPopup stockSymbol={selectedStock} closePopup={closePopup} />}
         </div>
     );

@@ -5,11 +5,13 @@
     background-color: rgb(24, 7, 60);
     margin-bottom: 1.5%;
     
-
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
+    
+    font-size: var(--subtitle-font-size);
+    font-weight: var(--subtitle-font-weight);
 }
 
 .dark-mode{

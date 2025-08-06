@@ -194,6 +194,16 @@ def add_stock():
         db.session.add(stock)
         message = f"Added new stock '{symbol}' with quantity {quantity}"
 
+    # Create transaction record
+    transaction = Transactions(
+        symbol=symbol,
+        type='BUY',
+        quantity=quantity,
+        purchase_price=purchase_price,
+        date=datetime.utcnow()
+    )
+    db.session.add(transaction)
+
     db.session.commit()
 
     return jsonify({
@@ -274,6 +284,16 @@ def sell_stock():
 
     if stock.quantity == quantity_to_sell:
         # Selling all shares - remove from portfolio
+        # Create transaction record before deleting stock
+        transaction = Transactions(
+            symbol=symbol,
+            type='SELL',
+            quantity=quantity_to_sell,
+            purchase_price=current_price,
+            date=datetime.utcnow()
+        )
+        db.session.add(transaction)
+        
         db.session.delete(stock)
         db.session.commit()
         return jsonify({
@@ -287,6 +307,17 @@ def sell_stock():
     else:
         # Partial sale - update quantity
         stock.quantity -= quantity_to_sell
+        
+        # Create transaction record for partial sale
+        transaction = Transactions(
+            symbol=symbol,
+            type='SELL',
+            quantity=quantity_to_sell,
+            purchase_price=current_price,
+            date=datetime.utcnow()
+        )
+        db.session.add(transaction)
+        
         db.session.commit()
         return jsonify({
             "message": f"Sold {quantity_to_sell} shares of '{symbol}', remaining: {stock.quantity}",
@@ -329,17 +360,25 @@ def get_portfolio_perfromance():
     ]
     
     return jsonify(res), 200
-    
+
 @app.route('/api/transactions', methods=['GET'])
-def get_transactions():
-    transactions = Transactions.query.all()
-    print(transactions)
-    if not transactions:
-        return jsonify([]), 200
-    
-    transactions_list = [t.to_dict() for t in transactions]
-    
-    return jsonify(transactions_list), 200
+def get_transaction_history():
+    """Get all transaction history ordered by date (newest first)"""
+    try:
+        transactions = Transactions.query.order_by(Transactions.date.desc(), Transactions.id.desc()).all()
+        
+        transaction_list = []
+        for transaction in transactions:
+            # Calculate total cost/proceeds for each transaction
+            total_amount = transaction.quantity * transaction.purchase_price
+            
+            transaction_data = transaction.to_dict()
+            transaction_data['total_amount'] = round(total_amount, 2)
+            transaction_list.append(transaction_data)
+        
+        return jsonify(transaction_list), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch transaction history: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(port=5050, debug=True)

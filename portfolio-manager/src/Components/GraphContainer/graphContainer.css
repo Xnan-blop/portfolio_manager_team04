@@ -1,12 +1,35 @@
 .graph-container{
-    width: 60%;
-    height: flex;
+    width: 100%;
+    height: 100%;
     background-color: #311b7d;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    margin: 0;
+    overflow: hidden; /* Match transaction container structure */
+}
 
-    align-content:center;
-    align-items:center;
-    text-align:left;
-    padding-left: 10px;
+.graph-header {
+    background-color: #4a2d8a;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #5a3d9a;
+    flex-shrink: 0;
+}
+
+.graph-header h3 {
+    color: white;
+    margin: 0 0 8px 0;
+    font-size: var(--title-font-size);
+    font-weight: var(--title-font-weight);
+}
+
+.net-worth-display {
+    color: #c6baef;
+    font-size: var(--subtitle-font-size);
+    font-weight: var(--subtitle-font-weight);
+    margin: 0;
 }
 
 .dark-mode{
@@ -14,10 +37,21 @@
 }
 
 .graph-canvas {
-    width: 100%;
-    height: 100%;
-    margin: 0px 10px 10px 0px;
-    background-color: rgb(24, 7, 60);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px; /* Match transaction list padding exactly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    margin: 15px; /* Add margin to match transaction container spacing */
+    max-height: calc(100% - 60px);
+}
+
+.graph-canvas canvas {
+    width: 95% !important;
+    height: 75% !important; /* Reduce height to make it less stretched */
+    max-height: 400px; /* Set a reasonable max height */
+    max-width: 100%;
 }

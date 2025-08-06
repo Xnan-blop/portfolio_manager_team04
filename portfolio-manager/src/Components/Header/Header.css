@@ -1,23 +1,21 @@
 .header{
     background-color: #311b7d;
     width: 100%;
-    height: auto;
-    min-height: 5vh;
-    margin-bottom: 2vh;
-    top: 0;
-    position: sticky;
-    padding: 1vh 2vh;
-
-    text-align: center;
-    align-items: center;
+    height: 80px;
+    flex-shrink: 0;
+    padding: 0 30px;
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .heading{
     margin: 0;
-    font-size: 1.5em;
+    font-size: var(--title-font-size);
+    font-weight: var(--title-font-weight);
+    flex-shrink: 0;
+    min-width: 200px;
 }
 
 .dark-mode{
@@ -28,35 +26,43 @@
     display: flex;
     align-items: center;
     color: #fff;
+    flex: 1;
+    justify-content: flex-end; /* Push to the right */
+    margin-left: auto; /* Additional push to the right */
 }
 
 .balance-section {
     display: flex;
-    gap: 2vh;
+    gap: 50px;
     align-items: center;
-    flex-wrap: wrap;
+    justify-content: flex-end; /* Align to the right */
+    width: auto; /* Don't take full width */
+    margin-right: 20px; /* Add some margin from the edge */
 }
 
 .balance-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 100px;
+    min-width: 120px;
+    text-align: center;
 }
 
 .label {
-    font-size: 0.8em;
+    font-size: var(--subtitle-font-size);
+    font-weight: var(--subtitle-font-weight);
     opacity: 0.8;
-    margin-bottom: 0.2vh;
+    margin-bottom: 4px;
 }
 
 .amount {
-    font-weight: bold;
-    font-size: 1em;
+    font-weight: var(--subtitle-font-weight);
+    font-size: var(--subtitle-font-size);
+    white-space: nowrap;
 }
 
 .amount.total {
-    font-size: 1.2em;
+    font-size: 1.3em;
     color: #4CAF50;
 }
 

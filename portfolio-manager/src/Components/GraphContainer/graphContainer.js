@@ -49,13 +49,24 @@ const GraphContainer = () => {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
+        aspectRatio: 2, // Add aspect ratio for better proportions
         plugins: {
           legend: { display: false }
+        },
+        layout: {
+          padding: {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+          }
         },
         scales: {
           x: {
             ticks: {
               color: "#fff",
+              maxTicksLimit: 8 // Limit number of x-axis labels
             },
             grid: {
               display: false
@@ -69,7 +80,8 @@ const GraphContainer = () => {
             max: Math.max(...y_axis) + 50,
             ticks: {
               stepSize: 1,
-              color: "#fff"
+              color: "#fff",
+              maxTicksLimit: 6 // Limit number of y-axis labels
             }
           }
         }
@@ -81,12 +93,24 @@ const GraphContainer = () => {
     };
   }, [portfolioData]);
 
-  
+  const getCurrentNetWorth = () => {
+    if (portfolioData.length === 0) return '$0.00';
+    const latestValue = portfolioData[portfolioData.length - 1]?.total_value || 0;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(latestValue);
+  };
 
   return (
     <div className="graph-container dark-mode">
-      <h2>Net Worth</h2>
-      <canvas className = "graph-canvas" ref={chartRef}></canvas>
+      <div className="graph-header">
+        <h3>Portfolio Value</h3>
+        <p className="net-worth-display">Current Value: {getCurrentNetWorth()}</p>
+      </div>
+      <div className="graph-canvas">
+        <canvas ref={chartRef}></canvas>
+      </div>
     </div>
   );
 };
