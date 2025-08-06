@@ -3,7 +3,7 @@ from flask_cors import CORS
 from models import db, Stock, Account, Portfolio, Transactions
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 from collections import defaultdict
 from copy import deepcopy
 
@@ -20,30 +20,48 @@ with app.app_context():
         account = Account(balance=100000.0)
         db.session.add(account)
         db.session.commit()
-    
-    # Retrieving stock data for portfolio performance
-    symbols = [s.symbol for s in Stock.query.all()]
-    price_data = None
 
-    if not symbols:
-        print("No symbols to update, adding default stock to fetch")
-        price_data = yf.download(['GOOGL'], period='1d')['Close']
-    else:   
-        price_data = yf.download(symbols, period='1mo')['Close']
+    ALL_TIME_STOCKS = [s.symbol for s in Stock.query.all()] 
+
+    if not ALL_TIME_STOCKS:
+        # Using GOOGL as placeholder stock
+        price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
+    else:
+        price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
+        
+        for date, i in price_data.iterrows():
+            date_str = date.strftime('%Y-%m-%d')
+            for symbol in ALL_TIME_STOCKS:
+                price = i.get(symbol)
+
+                if pd.isna(price):
+                    continue
+
+                exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
+
+                if not exists:
+                    db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
+    db.session.commit()
+
+def update_stock_closing_prices(symbol):
+    """
+    Fetches closing prices of stocks from yfinance for the graph and stores in the portfolio database
+    """
     
+    price_data = yf.download(symbol, period='1mo')['Close']
+
     for date, i in price_data.iterrows():
         date_str = date.strftime('%Y-%m-%d')
-        for symbol in symbols:
-            price = i.get(symbol)
 
-            if pd.isna(price):
-                continue
+        price = i.get(symbol)
+        if pd.isna(price):
+            continue
 
-            exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
+        exists = Portfolio.query.filter_by(symbol = symbol, date = date_str).first()
 
-            if not exists:
-                db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))
-
+        if not exists:
+            db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))    
+    
     db.session.commit()
     
 @app.route('/api/stocks/<ticker>')
@@ -323,12 +341,12 @@ def get_portfolio_performance():
         transactions = Transactions.query.order_by(Transactions.date).all()
 
         # get all dates as strings ans strip timestamp
-        all_dates = sorted(set(strip_time(t.date) for t in transactions))
+        all_dates = sorted(set(strip_time(str(t.date)) for t in transactions))
 
         # Group transactions by date for faster access
         transactions_by_date = defaultdict(list)
         for t in transactions:
-            transactions_by_date[strip_time(t.date)].append(t)
+            transactions_by_date[strip_time(str(t.date))].append(t)
         
         # get all stocks ever owned from the transactions table
         stock_quantity_by_symbol = defaultdict(int)
@@ -336,6 +354,13 @@ def get_portfolio_performance():
         # query the portfolio table
         portfolio = Portfolio.query.all()
         closing_prices_by_date = defaultdict(list)
+
+        stocks = [s.symbol for s in Stock.query.all()]
+
+        for s in stocks:
+            if s not in ALL_TIME_STOCKS:
+                update_stock_closing_prices(s)
+                ALL_TIME_STOCKS.append(s)
 
         # organize all closing prices for stocks by date
         for p in portfolio:
@@ -397,7 +422,12 @@ def get_portfolio_performance():
                 sum += stock["quantity"] * stock["closing_price"]
             portfolio_value_by_day[d] = sum
 
-        return jsonify(portfolio_value_by_day), 200
+        res = [
+        {"date": date, "total_value": round(value, 2)}
+        for date, value in sorted(portfolio_value_by_day.items())
+        ]
+
+        return jsonify(res), 200
     except Exception as e:
         return jsonify({"error": f"Failed to fetch portfolio data: {str(e)}"}), 500
    
