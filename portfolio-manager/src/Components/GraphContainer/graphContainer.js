@@ -12,6 +12,7 @@ const GraphContainer = () => {
       const response = await fetch('http://127.0.0.1:5050/api/portfolio/value');
       const data = await response.json();
       setPortfolioData(data);
+      console.log(portfolioData);
     } catch (err) {
       console.error('Failure fetching portfolio data for graph');
     }
@@ -36,10 +37,11 @@ const GraphContainer = () => {
     const y_axis = portfolioData.map(item => item.total_value);
    
     chartInstanceRef.current = new Chart(ctx, {
-      type: "line",
+      type: "bar",
       data: {
         labels: x_axis,
         datasets: [{
+          backgroundColor: "#fff",
           data: y_axis,
           fill: false,
           borderColor: "#fff",
