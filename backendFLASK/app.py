@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stocks.db'
 db.init_app(app)
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
     # Initialize account with $100,000 if it doesn't exist
     if not Account.query.first():
@@ -24,8 +25,8 @@ with app.app_context():
     ALL_TIME_STOCKS = [s.symbol for s in Stock.query.all()] 
 
     if not ALL_TIME_STOCKS:
-        # Using GOOGL as placeholder stock
-        price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
+        # skipping downloads since no stocks are owned yet
+        pass
     else:
         price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
         
@@ -63,6 +64,8 @@ def update_stock_closing_prices(symbol):
             db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))    
     
     db.session.commit()
+    ALL_TIME_STOCKS.append(symbol)
+    return ALL_TIME_STOCKS
     
 @app.route('/api/stocks/<ticker>')
 def get_stock(ticker):
@@ -331,6 +334,14 @@ def sell_stock():
             "remaining_shares": stock.quantity
         }), 200
 
+@app.route('/api/stocks/update', methods=['POST'])
+def update_portfolio_table():
+    stocks = [s.symbol for s in Transactions.query.all()]
+    for s in stocks:
+        if s not in ALL_TIME_STOCKS:
+            update_stock_closing_prices(s)
+    return jsonify({"status": "done"}), 200
+
 def strip_time(datetime_str):
     return datetime_str.split(" ")[0]
 
@@ -356,12 +367,7 @@ def get_portfolio_performance():
         closing_prices_by_date = defaultdict(list)
 
         stocks = [s.symbol for s in Stock.query.all()]
-
-        for s in stocks:
-            if s not in ALL_TIME_STOCKS:
-                update_stock_closing_prices(s)
-                ALL_TIME_STOCKS.append(s)
-
+        
         # organize all closing prices for stocks by date
         for p in portfolio:
             closing_prices_by_date[p.date].append({
