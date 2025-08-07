@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Chart } from "chart.js/auto";
 import './graphContainer.css';
 
-const GraphContainer = () => {
+const GraphContainer = ({ refreshKey }) => {
   const [portfolioData, setPortfolioData] = useState([]);
   
   useEffect(() => {
@@ -18,7 +18,7 @@ const GraphContainer = () => {
     }
   };
   PortfolioData();
-  }, []);
+  }, [refreshKey]);
 
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null); // to prevent duplicate chart renders

@@ -12,7 +12,6 @@ function App() {
     setRefreshKey(prev => prev + 1);
   };
 
-
   return (
     <div className="App">
       <Header refreshKey={refreshKey} />
@@ -22,7 +21,7 @@ function App() {
           <TransactionContainer refreshKey={refreshKey} />
         </div>
         <div className='right-column'>
-          <GraphContainer />
+          <GraphContainer refreshKey={refreshKey}/>
         </div>
       </div>
     </div>
