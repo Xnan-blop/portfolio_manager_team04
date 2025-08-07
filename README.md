@@ -21,10 +21,14 @@ A full-stack portfolio management application with real-time stock data integrat
 
 - **Account Balance System**: $100,000 starting balance with buy/sell validation
 - **Live Stock Data**: Real-time pricing via Yahoo Finance API
-- **Portfolio Analytics**: P&L calculations, portfolio allocation percentages
-- **Transaction History**: Complete chronological record of all buy/sell operations
+- **Comprehensive P&L Analytics**: Complete profit/loss tracking with realized and unrealized gains/losses
+  - **Unrealized P&L**: Current gains/losses on held positions
+  - **Realized P&L**: Actual profits/losses from completed sales (FIFO method)
+  - **Total P&L**: Combined view of all investment performance
+- **Portfolio Analytics**: Portfolio allocation percentages and performance metrics
+- **Transaction History**: Complete chronological record of all buy/sell operations with auto-refresh
 - **Responsive UI**: Mobile-friendly design with real-time updates
-- **Transaction Management**: Buy and sell stocks with ownership tracking
+- **Transaction Management**: Buy and sell stocks with ownership tracking and immediate UI updates
 
 ## Requirements
 
@@ -323,12 +327,215 @@ GET /portfolio/value
 ```
 **Used by**: GraphContainer for performance charts
 
+#### 7. Realized Profit/Loss
+**GET /portfolio/realized-pnl** - Calculate total realized P&L from completed transactions
+```http
+GET /portfolio/realized-pnl
+```
+**Response:**
+```json
+{
+    "total_realized_pnl": 1250.75
+}
+```
+**Features**: Uses FIFO (First In, First Out) method for accurate P&L calculation
+**Used by**: Header component for comprehensive P&L display
+
 ### **API Features:**
 - **CORS Enabled**: Frontend-backend communication from different ports
 - **Error Handling**: Comprehensive error responses with detailed messages
 - **Input Validation**: Server-side validation for all transactions
 - **Real-time Data**: Live stock prices via Yahoo Finance integration
 - **Transaction Integrity**: Atomic operations for buy/sell with rollback support
+
+## Yahoo Finance API Integration (yfinance)
+
+### **Overview**
+The application integrates with Yahoo Finance through the **yfinance** Python library to provide real-time stock market data. This integration enables live stock prices, company information, and historical data without requiring API keys or rate limits.
+
+### **How It Works**
+
+#### **1. Installation & Import**
+```python
+# Backend dependency
+pip install yfinance
+
+# Import in app.py
+import yfinance as yf
+```
+
+#### **2. Stock Search & Live Data Fetching**
+The main integration happens in the `/api/search/<query>` endpoint:
+
+```python
+@app.route('/api/search/<query>')
+def search_stock(query):
+    try:
+        # Create ticker object from user query
+        ticker = yf.Ticker(query.upper())
+        
+        # Fetch comprehensive stock information
+        info = ticker.info
+        
+        # Return structured data to frontend
+        return jsonify({
+            'symbol': info.get('symbol', query.upper()),
+            'name': info.get('longName', 'Unknown'),
+            'current_price': info.get('currentPrice', 0),
+            'currency': info.get('currency', 'USD'),
+            'previous_close': info.get('previousClose', 0),
+            'industry': info.get('industry', 'N/A'),
+            'sector': info.get('sector', 'N/A'),
+            'beta': info.get('beta', 0),
+            'dividend_yield': info.get('dividendYield', 0),
+            'volume': info.get('volume', 0),
+            'pe_ratio': info.get('trailingPE', 0),
+            'eps': info.get('trailingEps', 0)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+```
+
+#### **3. Historical Data for Portfolio Performance**
+On application startup, the system fetches 30-day historical data:
+
+```python
+# Get all owned stock symbols
+symbols = [s.symbol for s in Stock.query.all()]
+
+# Download 1-month historical closing prices
+price_data = yf.download(symbols, period='1mo')['Close']
+
+# Store in database for chart visualization
+for date, prices in price_data.iterrows():
+    for symbol in symbols:
+        portfolio_entry = Portfolio(
+            symbol=symbol, 
+            date=date.strftime('%Y-%m-%d'), 
+            closing_price=prices[symbol]
+        )
+        db.session.add(portfolio_entry)
+```
+
+#### **4. Real-time Price Fetching for Transactions**
+When buying stocks, the system fetches current market price:
+
+```python
+# During buy transactions
+stock_ticker = yf.Ticker(symbol)
+info = stock_ticker.info
+current_price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+
+# Use this price for transaction calculations
+total_cost = current_price * quantity
+```
+
+### **Data Sources & Accuracy**
+
+#### **Yahoo Finance Data Points**
+- **Real-time Prices**: Current market price and previous close
+- **Company Info**: Name, industry, sector, business description
+- **Financial Metrics**: P/E ratio, EPS, beta, dividend yield
+- **Trading Data**: Volume, market cap, price changes
+- **Historical Data**: Daily closing prices for portfolio charts
+
+#### **Data Reliability**
+- **Live Data**: Updated during market hours (9:30 AM - 4:00 PM EST)
+- **After Hours**: May show delayed or previous close prices
+- **Weekends**: Shows Friday's closing data
+- **International Stocks**: Supports global exchanges (NYSE, NASDAQ, etc.)
+
+### **Frontend Integration Flow**
+
+#### **Stock Search Process**
+```
+User Types Symbol (e.g., "AAPL")
+  ↓
+Frontend: fetch('/api/search/AAPL')
+  ↓
+Backend: yf.Ticker('AAPL').info
+  ↓
+Yahoo Finance API Call
+  ↓
+Return Live Stock Data
+  ↓
+Frontend: Display in BuySellPopup
+```
+
+#### **Buy Transaction with Live Pricing**
+```
+User Clicks "Buy 10 shares"
+  ↓
+Frontend: POST /api/stocks {symbol: "AAPL", quantity: 10}
+  ↓
+Backend: yf.Ticker('AAPL').info['currentPrice']
+  ↓
+Calculate: total_cost = current_price × 10
+  ↓
+Validate: account_balance >= total_cost
+  ↓
+Execute Transaction & Update Database
+```
+
+### **Error Handling & Fallbacks**
+
+#### **Network Issues**
+```python
+try:
+    ticker = yf.Ticker(symbol)
+    info = ticker.info
+    if not info or 'symbol' not in info:
+        return jsonify({'error': 'Stock not found'}), 404
+except Exception as e:
+    return jsonify({'error': 'Network error fetching stock data'}), 500
+```
+
+#### **Invalid Symbols**
+- Invalid ticker symbols return structured error messages
+- Frontend displays user-friendly error notifications
+- Graceful fallback to prevent application crashes
+
+#### **Market Closure**
+- System continues to work with last available prices
+- Historical data remains accessible for analysis
+- Clear indication when live data isn't available
+
+### **Performance Optimizations**
+
+#### **Caching Strategy**
+- Historical data cached in database (Portfolio table)
+- Avoids repeated API calls for chart data
+- Live prices fetched only when needed (search/transactions)
+
+#### **Batch Requests**
+```python
+# Efficient batch download for multiple stocks
+symbols = ['AAPL', 'GOOGL', 'MSFT']
+data = yf.download(symbols, period='1mo')
+```
+
+#### **Minimal API Calls**
+- Stock search: Only when user actively searches
+- Transaction pricing: Only during buy/sell operations
+- Historical data: Only on application startup
+
+### **Advantages of yfinance Integration**
+
+1. **No API Keys Required**: Free access to Yahoo Finance data
+2. **No Rate Limits**: Suitable for development and moderate usage
+3. **Comprehensive Data**: Rich financial information beyond just prices
+4. **Easy Implementation**: Simple Python library with minimal setup
+5. **Real-time Updates**: Live market data during trading hours
+6. **Global Coverage**: Supports international stock exchanges
+7. **Historical Data**: Access to years of historical price data
+
+### **Limitations & Considerations**
+
+1. **Yahoo Finance Dependency**: Relies on Yahoo's data availability
+2. **Unofficial API**: Not officially supported by Yahoo Finance
+3. **Rate Limiting**: Potential throttling with excessive requests
+4. **Data Delays**: May have slight delays during high market volatility
+5. **Network Dependency**: Requires internet connection for live data
 
 ## Calculations
 
@@ -338,14 +545,38 @@ GET /portfolio/value
 - **Current Value**: Sum of (quantity × current_price) for all holdings
 - **Total Portfolio**: Cash Balance + Current Value
 
-### Profit/Loss Calculation
-```
-For each stock:
-P&L = (current_price - purchase_price) × quantity
+### Comprehensive Profit/Loss Calculation
+The application now calculates **Total P&L** which includes both realized and unrealized gains/losses:
 
-Total P&L = Sum of all individual stock P&L
-P&L Percentage = (Total P&L / Invested Amount) × 100
+#### **Unrealized P&L** (Current Holdings)
 ```
+For each currently owned stock:
+Unrealized P&L = (current_price - purchase_price) × quantity
+
+Total Unrealized P&L = Sum of all individual stock unrealized P&L
+```
+
+#### **Realized P&L** (Completed Transactions)
+```
+Using FIFO (First In, First Out) method:
+For each SELL transaction:
+Realized P&L = (sale_price - original_purchase_price) × quantity_sold
+
+Total Realized P&L = Sum of all completed sale transactions
+```
+
+#### **Total P&L**
+```
+Total P&L = Unrealized P&L + Realized P&L
+P&L Percentage = (Total P&L / Total Amount Ever Invested) × 100
+```
+
+**Example Scenario:**
+1. Buy 100 AAPL at $150 → Invested: $15,000
+2. Buy 50 AAPL at $160 → Total Invested: $23,000
+3. Sell 75 AAPL at $170 → Realized P&L: $1,250 (using FIFO)
+4. Current AAPL price: $180 → Unrealized P&L: $2,250 (75 shares × $20)
+5. **Total P&L**: $1,250 + $2,250 = $3,500
 
 ### Portfolio Allocation
 ```
@@ -363,14 +594,21 @@ The React frontend is organized into modular components, each responsible for sp
 - **Layout**: Manages two-column layout (portfolio data + charts)
 
 #### **Header Component**
-- **Purpose**: Real-time portfolio overview and financial summary
+- **Purpose**: Real-time portfolio overview and comprehensive financial summary
 - **API Endpoints Called**:
   - `GET /api/account` - Fetches current cash balance
   - `GET /api/stocks` - Gets all owned stocks for portfolio calculations
+  - `GET /api/portfolio/realized-pnl` - Retrieves realized P&L from completed transactions
+  - `GET /api/search/{symbol}` - Gets current prices for unrealized P&L calculations
 - **Functionality**: 
   - Displays cash balance, invested amount, total portfolio value
-  - Calculates and displays P&L with color coding (green/red)
+  - **Comprehensive P&L Display**:
+    - **Total P&L**: Combined realized + unrealized gains/losses
+    - **Unrealized P&L**: Current gains/losses on held positions
+    - **Realized P&L**: Actual profits/losses from completed sales
+  - Color-coded P&L indicators (green for profit, red for loss)
   - Auto-refreshes on transaction completion
+  - FIFO (First In, First Out) method for accurate realized P&L calculation
 
 #### **StockContainer Component**
 - **Purpose**: Portfolio holdings management and stock list display
@@ -430,9 +668,14 @@ Header + StockContainer + TransactionContainer → Refresh Display
 ## UI Components
 
 ### Header Component
-- Real-time portfolio overview
-- Cash balance, invested amount, total value
-- P&L with color coding (green/red)
+- **Real-time portfolio overview** with comprehensive financial metrics
+- **Cash balance**, invested amount, total portfolio value
+- **Comprehensive P&L Display**:
+  - **Total P&L**: Master metric combining all gains/losses
+  - **└ Unrealized**: Breakdown showing potential gains on current holdings  
+  - **└ Realized**: Breakdown showing actual profits from completed sales
+- **Color-coded indicators**: Green for profits, red for losses
+- **Live updates**: Auto-refreshes after every transaction
 
 ### Stock Container
 - List of owned stocks
@@ -477,6 +720,10 @@ Header + StockContainer + TransactionContainer → Refresh Display
 5. **Transaction Errors**: If getting `total_amount` errors, ensure database schema is updated (delete and recreate `stocks.db`)
 6. **Duplicate Transactions**: Fixed in latest version - ensure you're using updated backend code
 7. **Transaction History Not Updating**: Auto-refresh functionality added - ensure frontend components are updated
+8. **P&L Calculation Issues**: 
+   - If realized P&L shows as $0.00 despite completed sales, check `/api/portfolio/realized-pnl` endpoint
+   - Ensure transaction history has both BUY and SELL records with proper timestamps
+   - Realized P&L uses FIFO method - first purchases are matched with first sales
 
 ### Port Configuration
 - Backend: `http://127.0.0.1:5050`

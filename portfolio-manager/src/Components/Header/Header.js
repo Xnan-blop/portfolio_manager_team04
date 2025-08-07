@@ -5,7 +5,8 @@ const Header = ({ refreshKey }) => {
     const [accountInfo, setAccountInfo] = useState({
         balance: 0,
         totalInvested: 0,
-        totalValue: 0
+        totalValue: 0,
+        realizedPnL: 0
     });
     const [isLoading, setIsLoading] = useState(true);
 
@@ -22,6 +23,10 @@ const Header = ({ refreshKey }) => {
             // Fetch all stocks to calculate invested amount
             const stocksResponse = await fetch('http://127.0.0.1:5050/api/stocks');
             const stocksData = await stocksResponse.json();
+            
+            // Fetch realized P&L from completed transactions
+            const realizedPnLResponse = await fetch('http://127.0.0.1:5050/api/portfolio/realized-pnl');
+            const realizedPnLData = await realizedPnLResponse.json();
             
             // Calculate total invested amount
             const totalInvested = stocksData.reduce((sum, stock) => {
@@ -49,7 +54,8 @@ const Header = ({ refreshKey }) => {
             setAccountInfo({
                 balance: accountData.balance,
                 totalInvested: totalInvested,
-                totalValue: totalCurrentValue
+                totalValue: totalCurrentValue,
+                realizedPnL: realizedPnLResponse.ok ? realizedPnLData.total_realized_pnl : 0
             });
         } catch (error) {
             console.error('Error fetching account info:', error);
@@ -68,7 +74,8 @@ const Header = ({ refreshKey }) => {
     }
 
     const totalPortfolioValue = accountInfo.balance + accountInfo.totalValue;
-    const profitLoss = accountInfo.totalValue - accountInfo.totalInvested;
+    const unrealizedPnL = accountInfo.totalValue - accountInfo.totalInvested;
+    const totalPnL = unrealizedPnL + accountInfo.realizedPnL;
 
     return (
         <div className='header'>
@@ -90,9 +97,21 @@ const Header = ({ refreshKey }) => {
                         <span className='amount total'>${totalPortfolioValue.toFixed(2)}</span>
                     </div>
                     <div className='balance-item'>
-                        <span className='label'>P&L:</span>
-                        <span className={`amount ${profitLoss >= 0 ? 'profit' : 'loss'}`}>
-                            ${profitLoss.toFixed(2)}
+                        <span className='label'>Total P&L:</span>
+                        <span className={`amount ${totalPnL >= 0 ? 'profit' : 'loss'}`}>
+                            ${totalPnL.toFixed(2)}
+                        </span>
+                    </div>
+                    <div className='balance-item pnl-breakdown'>
+                        <span className='label'>└ Unrealized:</span>
+                        <span className={`amount small ${unrealizedPnL >= 0 ? 'profit' : 'loss'}`}>
+                            ${unrealizedPnL.toFixed(2)}
+                        </span>
+                    </div>
+                    <div className='balance-item pnl-breakdown'>
+                        <span className='label'>└ Realized:</span>
+                        <span className={`amount small ${accountInfo.realizedPnL >= 0 ? 'profit' : 'loss'}`}>
+                            ${accountInfo.realizedPnL.toFixed(2)}
                         </span>
                     </div>
                 </div>

@@ -361,5 +361,57 @@ def get_transaction_history():
     except Exception as e:
         return jsonify({"error": f"Failed to fetch transaction history: {str(e)}"}), 500
 
+@app.route('/api/portfolio/realized-pnl', methods=['GET'])
+def get_realized_pnl():
+    """Calculate total realized profit/loss from completed transactions"""
+    try:
+        # Get all transactions grouped by symbol
+        transactions = Transactions.query.order_by(Transactions.date.asc()).all()
+        
+        # Track position for each symbol (FIFO - First In, First Out)
+        positions = {}  # symbol: [(quantity, price), ...]
+        total_realized_pnl = 0.0
+        
+        for transaction in transactions:
+            symbol = transaction.symbol
+            
+            if symbol not in positions:
+                positions[symbol] = []
+            
+            if transaction.type == 'BUY':
+                # Add to position
+                positions[symbol].append({
+                    'quantity': transaction.quantity,
+                    'price': transaction.purchase_price
+                })
+            
+            elif transaction.type == 'SELL':
+                # Calculate realized P&L using FIFO
+                quantity_to_sell = transaction.quantity
+                sale_price = transaction.purchase_price  # This is current price at time of sale
+                
+                while quantity_to_sell > 0 and positions[symbol]:
+                    oldest_position = positions[symbol][0]
+                    
+                    if oldest_position['quantity'] <= quantity_to_sell:
+                        # Sell entire oldest position
+                        realized_pnl = (sale_price - oldest_position['price']) * oldest_position['quantity']
+                        total_realized_pnl += realized_pnl
+                        quantity_to_sell -= oldest_position['quantity']
+                        positions[symbol].pop(0)  # Remove sold position
+                    else:
+                        # Partial sale of oldest position
+                        realized_pnl = (sale_price - oldest_position['price']) * quantity_to_sell
+                        total_realized_pnl += realized_pnl
+                        oldest_position['quantity'] -= quantity_to_sell
+                        quantity_to_sell = 0
+        
+        return jsonify({
+            "total_realized_pnl": round(total_realized_pnl, 2)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to calculate realized P&L: {str(e)}"}), 500
+
 if __name__ == '__main__':
     app.run(port=5050, debug=True)
