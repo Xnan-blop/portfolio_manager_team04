@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stocks.db'
 db.init_app(app)
 
 with app.app_context():
-    db.drop_all()
     db.create_all()
     # Initialize account with $100,000 if it doesn't exist
     if not Account.query.first():
@@ -367,7 +366,7 @@ def get_portfolio_performance():
         closing_prices_by_date = defaultdict(list)
 
         stocks = [s.symbol for s in Stock.query.all()]
-        
+
         # organize all closing prices for stocks by date
         for p in portfolio:
             closing_prices_by_date[p.date].append({
