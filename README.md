@@ -1,442 +1,202 @@
 # Portfolio Manager - Team 04
 
-A full-stack portfolio management application with real-time stock data integration, transaction history tracking, and account balance management.
+A portfolio management application built with Flask and React. It tracks stock investments, calculates profit/loss, and shows performance over time using real-time data from Yahoo Finance.
 
-## Technologies and Tools
+## Technologies We Used
 
-### **Backend Technologies**
+### **Backend**
 
-#### **Flask (Python Web Framework)**
-- **Purpose**: Main web server and REST API framework
-- **Why we chose it**: Lightweight, flexible, excellent for APIs
-- **Key Features**: Route handling, JSON responses, middleware support
-- **Used for**: All API endpoints, request/response handling, business logic
+#### **Flask**
+- What it does: Web server and API endpoints
+- Why we used it: This was the Python web framework taught in our training
+- What we built with it: All the API routes that handle buying/selling stocks and getting data
 
-#### **SQLAlchemy (Object-Relational Mapping)**
-- **Purpose**: Database operations and object mapping
-- **Why we chose it**: Pythonic database interactions, automatic schema management
-- **Key Features**: Model definitions, relationship management, query building
-- **Used for**: All database operations (CRUD), table relationships, data validation
+#### **SQLAlchemy**
+- What it does: Handles database operations  
+- Why we used it: Makes it easier to work with databases in Python (taught in our coursework)
+- What we built with it: All our database models and queries
 
-#### **SQLite Database**
-- **Purpose**: Local development database
-- **Why we chose it**: Zero configuration, file-based, perfect for development
-- **Key Features**: ACID transactions, lightweight, embedded
-- **Used for**: Storing account data, stock holdings, transaction history, portfolio performance
+#### **SQLite**
+- What it does: Stores all our data
+- Why we used it: Simple database that doesn't need setup, perfect for a training project
+- What we store: Account balance, stock holdings, transaction history, price data for charts
 
-#### **Flask-CORS (Cross-Origin Resource Sharing)**
-- **Purpose**: Enable frontend-backend communication
-- **Why we chose it**: Required for React app on different port
-- **Key Features**: Automatic CORS headers, configurable origins
-- **Used for**: Allowing React (port 3000) to call Flask API (port 5050)
+#### **Flask-CORS**
+- What it does: Lets our React app talk to our Flask server
+- Why we needed it: React runs on port 3000, Flask runs on port 5050, so we need CORS to connect them
+- How we use it: Automatically handles the cross-origin requests
 
-#### **yfinance (Yahoo Finance API)**
-- **Purpose**: Real-time stock market data integration
-- **Why we chose it**: Free, no API key required, comprehensive data
-- **Key Features**: Live prices, company info, historical data
-- **Used for**: Stock search, current pricing, company details, portfolio valuation
+#### **yfinance**
+- What it does: Gets live stock prices and company info from Yahoo Finance
+- Why we used it: The project specifications recommended using Yahoo Finance, and this library makes it easy
+- What we get: Current stock prices, company names, historical data for our charts
 
-### **Frontend Technologies**
+### **Frontend**
 
-#### **React 18+ (Component-Based UI Framework)**
-- **Purpose**: User interface and user experience
-- **Why we chose it**: Component reusability, state management, modern development
-- **Key Features**: Hooks, state management, component lifecycle
-- **Used for**: All UI components, user interactions, real-time updates
+#### **React**
+- What it does: Builds our user interface 
+- Why we used it: This was the frontend framework taught in our web development training
+- What we built: All the components like the header, stock list, buy/sell forms, and charts
 
-#### **Fetch API (HTTP Client)**
-- **Purpose**: Frontend-backend communication
-- **Why we chose it**: Native JavaScript, Promise-based, modern approach
-- **Key Features**: Async/await support, JSON handling, error management
-- **Used for**: All API calls to Flask backend, data fetching, form submissions
+#### **Fetch API**
+- What it does: Makes requests to our Flask backend
+- Why we used it: Built into JavaScript, so no extra libraries needed
+- How we use it: Gets account data, stock prices, submits buy/sell orders
 
-#### **Chart.js (Data Visualization)**
-- **Purpose**: Portfolio performance charts and graphs
-- **Why we chose it**: Responsive charts, extensive customization, React integration
-- **Key Features**: Interactive charts, real-time updates, multiple chart types
-- **Used for**: Portfolio performance graphs, historical data visualization
+#### **Chart.js**
+- What it does: Creates the portfolio performance charts
+- Why we chose it: Needed something to show portfolio performance over time visually
+- What it shows: Line charts of portfolio value over the past month
 
-#### **CSS3 (Styling and Design)**
-- **Purpose**: User interface styling and responsive design
-- **Why we chose it**: Native web technology, flexible layouts, animations
-- **Key Features**: Flexbox, grid layouts, responsive design, custom properties
-- **Used for**: Component styling, responsive layouts, color schemes, animations
+#### **CSS**
+- What it does: Makes everything look good and responsive
+- How we use it: Styling all our components, making the layout work on different screen sizes
 
-### **Development Tools and Environment**
+## How Everything Works Together
 
-#### **Python 3.10+**
-- **Purpose**: Backend runtime environment
-- **Key Features**: Type hints, performance improvements, modern syntax
-- **Used for**: Running Flask application, data processing, business logic
+The basic flow is:
+1. **React frontend** shows the user interface
+2. **Fetch API** sends requests to our Flask backend  
+3. **Flask** processes the requests and talks to the database
+4. **SQLAlchemy** handles all database operations
+5. **yfinance** gets live stock prices when needed
+6. **Flask** sends JSON responses back to React
+7. **React** updates the UI with new data
 
-#### **Node.js 16+**
-- **Purpose**: Frontend development environment
-- **Key Features**: NPM package management, development server, build tools
-- **Used for**: React development, dependency management, build processes
+## Architecture
 
-#### **Git Version Control**
-- **Purpose**: Source code management and team collaboration
-- **Key Features**: Branching, merging, history tracking, collaboration
-- **Used for**: Code versioning, team coordination, deployment management
+We built this as a typical web application:
+- **Frontend (React)** - runs on localhost:3000
+- **Backend (Flask)** - runs on localhost:5050  
+- **Database (SQLite)** - stores all our data
+- **External API (Yahoo Finance)** - provides live stock data
 
-#### **VS Code (Development Environment)**
-- **Purpose**: Integrated development environment
-- **Key Features**: Syntax highlighting, debugging, extensions, terminal integration
-- **Used for**: Code editing, debugging, project management, Git integration
+## Main Components
 
-### **Architecture Patterns and Methodologies**
+**Frontend Components:**
+- **Header** - Shows portfolio balance, total value, and profit/loss
+- **StockContainer** - Lists all your current stock holdings  
+- **BuySellPopup** - Form to buy or sell stocks with live pricing
+- **TransactionContainer** - History of all your trades
+- **GraphContainer** - Charts showing portfolio performance over time
 
-#### **REST API Architecture**
-- **Pattern**: RESTful web services with HTTP methods
-- **Implementation**: GET, POST, DELETE endpoints with JSON responses
-- **Benefits**: Standard conventions, scalable, stateless communication
+**Backend API Endpoints:**
+- **Account management** - Get current cash balance
+- **Stock operations** - Buy and sell stocks
+- **Portfolio data** - Get holdings and performance  
+- **Live pricing** - Search stocks and get current prices
+- **Transaction history** - Record of all trades
 
-#### **MVC Pattern (Model-View-Controller)**
-- **Models**: SQLAlchemy database models (`models.py`)
-- **Views**: React components for user interface
-- **Controllers**: Flask route handlers in `app.py`
+**Database Tables:**
+- **Account** - Your cash balance ($100,000 starting amount)
+- **Stock** - Current holdings (symbol, quantity, average price)
+- **Transactions** - Complete history of all buy/sell trades
+- **Portfolio** - Historical price data for charts
 
-#### **Separation of Concerns**
-- **Backend**: Business logic, data management, API endpoints
-- **Frontend**: User interface, user experience, data presentation
-- **Database**: Data persistence, relationships, integrity
+## How Data Flows Through the App
 
-#### **Component-Based Architecture (React)**
-- **Reusable Components**: Header, StockContainer, BuySellPopup, etc.
-- **State Management**: React hooks for local and global state
-- **Props System**: Data flow between components
+**When you search for a stock:**
+1. You type a symbol like "AAPL" in the buy/sell form
+2. React sends a request to our Flask API
+3. Flask uses yfinance to get live data from Yahoo Finance  
+4. Current price and company info comes back and displays
 
-### **Integration Technologies**
+**When you buy or sell:**
+1. You submit the form with symbol and quantity
+2. Flask checks if you have enough money (for buying) or own the stock (for selling)
+3. Flask gets the current price from Yahoo Finance
+4. Database gets updated with new balance and holdings
+5. React refreshes all components to show the changes
 
-#### **JSON (Data Exchange Format)**
-- **Purpose**: Standardized data communication between frontend and backend
-- **Used for**: API requests/responses, configuration files, data storage
+**How profit/loss is calculated:**
+- **Unrealized P&L**: Compares current stock prices to what you paid (calculated in React)
+- **Realized P&L**: Tracks actual profits from completed sales using FIFO method (calculated in Flask)
+- **Total P&L**: Adds both together to show your overall performance
 
-#### **HTTP/HTTPS Protocol**
-- **Purpose**: Web communication standard
-- **Used for**: Frontend-backend communication, external API calls
+## Database Setup
 
-#### **SQL (Database Query Language)**
-- **Purpose**: Database operations and data manipulation
-- **Used for**: Complex queries, data relationships, performance optimization
+We use SQLite with four tables to store everything:
 
-### **Why These Technologies Work Well Together**
-
-1. **Python + Flask**: Rapid API development with minimal boilerplate
-2. **React + Fetch API**: Modern frontend with seamless backend integration
-3. **SQLAlchemy + SQLite**: Easy database management with Python integration
-4. **yfinance Integration**: Real-time financial data without complex API setup
-5. **CORS Configuration**: Enables development workflow with separate servers
-6. **Component Architecture**: Maintainable, scalable frontend structure
-
-## Application Architecture
-
-### **High-Level System Architecture**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    PORTFOLIO MANAGER SYSTEM                     │
-├─────────────────────────────────────────────────────────────────┤
-│  Frontend (React)              │  Backend (Flask)               │
-│  Port: 3000                    │  Port: 5050                    │
-│                                │                                │
-│  ┌─────────────────────────┐   │  ┌─────────────────────────┐   │
-│  │     User Interface      │   │  │     REST API            │   │
-│  │  ┌─────────────────┐    │   │  │  ┌─────────────────┐    │   │
-│  │  │ Header          │◄───┼───┼──┤  │ Account Mgmt    │    │   │
-│  │  │ StockContainer  │    │   │  │  │ Stock Trading   │    │   │
-│  │  │ BuySellPopup    │    │   │  │  │ P&L Calculation │    │   │
-│  │  │ TransactionList │    │   │  │  │ Transaction Log │    │   │
-│  │  │ GraphContainer  │    │   │  │  └─────────────────┘    │   │
-│  │  └─────────────────┘    │   │  │                         │   │
-│  └─────────────────────────┘   │  └─────────────────────────┘   │
-│                                │              │                │
-│                                │              ▼                │
-│                                │  ┌─────────────────────────┐   │
-│                                │  │    Database (SQLite)    │   │
-│                                │  │  ┌─────────────────┐    │   │
-│                                │  │  │ Account         │    │   │
-│                                │  │  │ Stock           │    │   │
-│                                │  │  │ Transactions    │    │   │
-│                                │  │  │ Portfolio       │    │   │
-│                                │  │  └─────────────────┘    │   │
-│                                │  └─────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-                ┌─────────────────────────────┐
-                │   External API Integration  │
-                │                             │
-                │  ┌─────────────────────┐    │
-                │  │  Yahoo Finance      │    │
-                │  │  (yfinance)         │    │
-                │  │  - Live Prices      │    │
-                │  │  - Company Info     │    │
-                │  │  - Historical Data  │    │
-                │  └─────────────────────┘    │
-                └─────────────────────────────┘
-```
-
-### **Component Communication Flow**
-
-```
-User Interaction
-    ↓
-React Components
-    ↓ (Fetch API)
-Flask REST API
-    ↓ (SQLAlchemy)
-SQLite Database
-    ↓ (External API)
-Yahoo Finance
-    ↓ (Response Chain)
-Flask → React → User Display
-```
-
-### **Data Flow Architecture**
-
-#### **Real-Time Stock Data Flow:**
-1. User searches for stock in BuySellPopup
-2. Frontend calls `/api/search/{symbol}`
-3. Flask calls Yahoo Finance via yfinance
-4. Live data returned to frontend for display
-
-#### **Transaction Processing Flow:**
-1. User submits buy/sell order
-2. Frontend validates and calls appropriate API
-3. Backend validates funds/ownership
-4. Database updated (Account, Stock, Transactions)
-5. Success response triggers UI refresh
-
-#### **P&L Calculation Flow:**
-1. Header component requests multiple data sources
-2. Realized P&L calculated in backend (FIFO method)
-3. Unrealized P&L calculated in frontend (ACB method)
-4. Combined for total P&L display with percentage
-
-## Data Model and Database Design
-
-### **Database Schema Overview**
-
-Our portfolio management system uses a relational database with four core tables designed for financial data integrity and comprehensive transaction tracking.
-
-#### **Design Principles:**
-- **Data Integrity**: Foreign key relationships and constraints
-- **Audit Trail**: Immutable transaction history
-- **Performance**: Indexed fields for fast queries
-- **Scalability**: Normalized structure for growth
-- **Simplicity**: Clear table relationships and purposes
-
-### **Complete Database Schema**
-
-#### **1. Account Table - User Balance Management**
+### **Account Table**
 ```sql
 CREATE TABLE account (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     balance REAL NOT NULL DEFAULT 100000.0
 );
 ```
-**Purpose**: Tracks available cash for transactions  
-**Design Decisions**:
-- Single record per user (simple portfolio manager)
-- Auto-initialized with $100,000 starting balance
-- Real number type for precise financial calculations
-- Primary key for future expansion to multiple accounts
+This just stores your cash balance. Everyone starts with $100,000.
 
-**Business Rules**:
-- Balance decreases when buying stocks
-- Balance increases when selling stocks
-- Must have sufficient balance before transactions
-- Updated atomically with stock transactions
-
-**Usage in Application**:
-- Validated before every purchase transaction
-- Displayed in Header component as "Cash Available"
-- Updated by both buy and sell operations
-
-#### **2. Stock Table - Current Portfolio Holdings**
+### **Stock Table**  
 ```sql
 CREATE TABLE stock (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    symbol VARCHAR(10) NOT NULL UNIQUE,
+    id INTEGER PRIMARY KEY,
+    symbol VARCHAR(10) NOT NULL,
     name VARCHAR(100) NOT NULL,
     quantity INTEGER NOT NULL,
     purchase_price REAL NOT NULL
 );
 ```
-**Purpose**: Stores current stock holdings with weighted average cost basis (ACB)
+This stores what stocks you currently own. The `purchase_price` is your average cost per share (it updates when you buy more of the same stock).
 
-**Design Decisions**:
-- **symbol**: Stock ticker (e.g., "AAPL") - unique per holding
-- **name**: Company name for display purposes
-- **quantity**: Current number of shares owned
-- **purchase_price**: Weighted average purchase price (ACB)
-
-**Key Business Logic**:
-```python
-# ACB calculation when buying more of same stock:
-old_cost = existing_quantity * current_purchase_price
-new_cost = new_quantity * new_purchase_price
-total_cost = old_cost + new_cost
-total_quantity = existing_quantity + new_quantity
-new_purchase_price = total_cost / total_quantity
-```
-
-**Critical Features**:
-- **Automatic ACB Updates**: Recalculated on each additional purchase
-- **Position Removal**: Deleted when all shares sold
-- **Quantity Tracking**: Updated on both buy and sell transactions
-- **Unique Symbols**: One record per stock symbol (quantities aggregated)
-
-**Usage in Application**:
-- Source for unrealized P&L calculations (ACB method)
-- Displayed in StockContainer for portfolio overview
-- Used for ownership validation in sell transactions
-
-#### **3. Transactions Table - Complete Trading Audit Trail**
+### **Transactions Table**
 ```sql
 CREATE TABLE transactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     symbol VARCHAR(10) NOT NULL,
     quantity INTEGER NOT NULL,
     purchase_price REAL NOT NULL,
     total_amount REAL NOT NULL,
-    type VARCHAR(4) NOT NULL CHECK (type IN ('BUY', 'SELL')),
-    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    type VARCHAR(4) NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
-**Purpose**: Immutable record of all buy/sell transactions for FIFO calculations
+This keeps a permanent record of every buy/sell transaction. We need this for calculating realized profit/loss using the FIFO method.
 
-**Design Decisions**:
-- **Immutable Records**: Never updated or deleted (audit trail)
-- **Complete Information**: Every transaction fully documented
-- **Chronological Order**: Timestamp for FIFO sequencing
-- **Type Safety**: CHECK constraint ensures only BUY/SELL types
+Note: The `purchase_price` field means different things:
+- For BUY transactions: the price you paid per share
+- For SELL transactions: the price you sold at per share
 
-**Field Explanations**:
-- **purchase_price**: Actual price at time of transaction (buy price for BUY transactions, sale price for SELL transactions)
-- **total_amount**: quantity × purchase_price (calculated for convenience)
-- **type**: 'BUY' or 'SELL' for transaction categorization
-- **date**: Precise timestamp with timezone for FIFO ordering
-
-**Important**: The `purchase_price` field serves dual purposes:
-- For **BUY transactions**: Stores the actual purchase price per share
-- For **SELL transactions**: Stores the actual sale price per share at time of sale
-
-**Critical for FIFO Calculations**:
-```python
-# FIFO matching algorithm uses this data:
-# 1. Order all transactions by date ASC
-# 2. For each symbol, track purchase "lots"
-# 3. Match sales to oldest purchases first
-# 4. Calculate realized P&L per matched lot
-```
-
-**Usage in Application**:
-- Source data for realized P&L calculations (FIFO method)
-- Displayed in TransactionContainer for trading history
-- Used for portfolio performance tracking over time
-
-#### **4. Portfolio Table - Historical Performance Data**
+### **Portfolio Table**
 ```sql
 CREATE TABLE portfolio (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     symbol VARCHAR(10) NOT NULL,
     date VARCHAR(10) NOT NULL,
-    closing_price REAL NOT NULL,
-    UNIQUE(symbol, date)
+    closing_price REAL NOT NULL
 );
 ```
-**Purpose**: Stores historical daily closing prices for portfolio performance charts
-
-**Design Decisions**:
-- **Date Storage**: String format 'YYYY-MM-DD' for easy querying
-- **Unique Constraint**: One price per symbol per date
-- **Automated Population**: Filled via Yahoo Finance on app startup
-- **30-Day History**: One month of data for performance tracking
-
-**Data Population Process**:
-```python
-# Automatic data loading on app startup:
-for symbol in owned_stocks:
-    price_data = yf.download(symbol, period='1mo')['Close']
-    for date, price in price_data.iterrows():
-        # Store each day's closing price
-        portfolio_entry = Portfolio(
-            symbol=symbol,
-            date=date.strftime('%Y-%m-%d'),
-            closing_price=price
-        )
-```
-
-**Usage in Application**:
-- Powers GraphContainer performance charts
-- Enables historical portfolio value calculations
-- Tracks performance trends over time
-
-### **Database Relationships and Integrity**
-
-#### **Logical Relationships:**
-```
-Account (1) ←→ (many) Transactions [via business logic]
-Stock (1) ←→ (many) Transactions [via symbol matching]
-Portfolio (many) ←→ (1) Stock [via symbol matching]
-```
-
-#### **Data Integrity Rules:**
-1. **Account Balance**: Must be non-negative after validation
-2. **Stock Quantities**: Must be positive (zero quantity = deletion)
-3. **Transaction Types**: Must be exactly 'BUY' or 'SELL'
-4. **Symbol Consistency**: Same symbol across all tables
-5. **Date Integrity**: Transactions ordered chronologically for FIFO
-
-#### **Atomic Transaction Guarantees:**
-```python
-# All database operations within single transaction:
-try:
-    # Update account balance
-    account.balance -= total_cost
-    # Update or create stock holding
-    stock.quantity += quantity
-    stock.purchase_price = new_acb
-    # Create transaction record
-    transaction = Transactions(...)
-    # Commit all changes together
-    db.session.commit()
-except:
-    # Rollback all changes if any fail
-    db.session.rollback()
-```
-
-### **Database Design Benefits**
-
-1. **Audit Trail**: Complete transaction history for compliance
-2. **Performance**: Indexed queries for fast P&L calculations
-3. **Flexibility**: Supports multiple accounting methods (FIFO, ACB)
-4. **Scalability**: Normalized design handles portfolio growth
-5. **Integrity**: ACID transactions prevent data corruption
-6. **Historical Analysis**: Portfolio performance tracking over time
-
-## Tech Stack
-
-### **Backend**
-- **Flask** - Python web framework for API endpoints
-- **SQLAlchemy** - ORM for database operations
-- **SQLite** - Lightweight database for local development
-- **Flask-CORS** - Cross-origin resource sharing for frontend-backend communication
-- **yfinance** - Yahoo Finance API integration for real-time stock data
-
-### **Frontend**
-- **React 18+** - Component-based UI framework
-- **Chart.js** - Data visualization and portfolio charts
-- **CSS3** - Custom styling and responsive design
-- **Fetch API** - HTTP client for backend communication
+This stores historical daily prices for each stock you've owned. We use this data to create the performance charts.
 
 ## Features
 
-- **Account Balance System**: $100,000 starting balance with buy/sell validation
+- **Account Balance Management**: Start with $100,000, track spending and earnings
+- **Live Stock Data**: Real-time prices from Yahoo Finance  
+- **Buy/Sell Stocks**: Complete transaction system with live pricing
+- **Profit/Loss Tracking**: 
+  - Unrealized P&L: Paper gains/losses on current holdings
+  - Realized P&L: Actual profits from completed sales (using FIFO method)
+  - Total P&L: Combined view of all performance
+- **Portfolio Charts**: Visual performance tracking over time
+- **Transaction History**: Complete record of all trades
+- **Real-time Updates**: Everything updates automatically after transactions
+
+## Tech Stack
+
+**Backend:**
+- Flask - Python web framework  
+- SQLAlchemy - Database ORM
+- SQLite - Database storage
+- yfinance - Yahoo Finance API
+
+**Frontend:**
+- React - User interface
+- Chart.js - Portfolio charts  
+- CSS - Styling
+- Fetch API - API requests
+
+## Getting Started
 - **Live Stock Data**: Real-time pricing via Yahoo Finance API
-- **Comprehensive P&L Analytics**: Complete profit/loss tracking with realized and unrealized gains/losses
+- **P&L Analytics**: Complete profit/loss tracking with realized and unrealized gains/losses
   - **Unrealized P&L**: Current gains/losses on held positions
   - **Realized P&L**: Actual profits/losses from completed sales (FIFO method)
   - **Total P&L**: Combined view of all investment performance
@@ -587,7 +347,7 @@ CREATE TABLE portfolio (
 
 ### Base URL: `http://127.0.0.1:5050/api`
 
-The backend provides a comprehensive REST API built with Flask in `app.py`. This file is the heart of our portfolio management system, handling all business logic, database operations, and external API integrations.
+The backend provides a REST API built with Flask in `app.py`. This file contains our portfolio management system's business logic, database operations, and external API integrations.
 
 ### **Understanding app.py: The API Engine**
 
@@ -630,7 +390,7 @@ Our API follows RESTful principles with clear HTTP methods and status codes:
 - **POST**: Create new resources (buy stocks)
 - **DELETE**: Remove resources (sell stocks)
 - **JSON**: All data exchanged in JSON format
-- **Error Handling**: Comprehensive error responses with meaningful messages
+- **Error Handling**: Good error messages when things go wrong
 
 ### **Complete API Endpoint Documentation**
 
@@ -737,7 +497,7 @@ def search_stock(query):
 ```
 **Business Logic**:
 - Integrates with yfinance library to fetch live Yahoo Finance data
-- Comprehensive error handling for invalid symbols or network issues
+- Good error handling for invalid symbols or network issues
 - Returns detailed stock information for frontend display
 - Used by BuySellPopup for stock search and pricing, Header for unrealized P&L
 
@@ -916,7 +676,7 @@ for transaction in transactions:
 - Implements First In, First Out accounting method
 - Matches each sale to specific purchase lots chronologically
 - Provides tax-compliant P&L calculation
-- Used by Header component for comprehensive P&L display
+- Used by Header component for complete P&L display
 
 #### 8. Portfolio Performance Tracking
 **GET /portfolio/value** - Historical portfolio performance data
@@ -950,6 +710,252 @@ GET /api/portfolio/value
 - Used by GraphContainer for performance visualization
 - Integrates with historical price data from Yahoo Finance
 
+## Yahoo Finance Integration
+
+We use the `yfinance` Python library to get real-time stock data from Yahoo Finance.
+
+### Why Yahoo Finance?
+- The project specifications recommended using Yahoo Finance as our data source
+- yfinance library was suggested in our training materials  
+- It's free and doesn't require API keys
+- Provides live stock prices, company information, and historical data
+- Easy to integrate with Python/Flask
+
+### What We Get From It:
+- **Live stock prices** - for buying/selling at current market rates
+- **Company information** - names, sectors, financial metrics
+- **Historical data** - for our portfolio performance charts
+- **Stock validation** - confirms if a stock symbol exists
+
+### How We Use It:
+1. **Stock search** - when you type "AAPL", we verify it exists and get current price
+2. **Buy/sell transactions** - we get the live price at the moment of purchase/sale
+3. **Portfolio valuation** - we fetch current prices to calculate your unrealized P&L
+4. **Charts** - we download historical prices to show portfolio performance over time
+
+The integration is straightforward - our Flask backend calls yfinance functions, gets the data back as Python objects, and sends it to our React frontend as JSON.
+
+#### **Technical Implementation Details**
+
+**1. Stock Search & Real-Time Pricing**
+```python
+# app.py - Lines 71-93
+@app.route('/api/search/<query>')
+def search_stock(query):
+    try:
+        ticker = yf.Ticker(query.upper())  # Create yfinance ticker object
+        info = ticker.info                 # Fetch detailed stock data
+        
+        if info and 'symbol' in info:
+            return jsonify({
+                'symbol': info.get('symbol', query.upper()),
+                'name': info.get('longName', 'Unknown'),
+                'current_price': info.get('currentPrice', 0),      # Live price
+                'previous_close': info.get('previousClose', 0),
+                'volume': info.get('volume', 0),                   # Trading volume
+                'pe_ratio': info.get('trailingPE', 0),            # Financial metrics
+                'industry': info.get('industry', 'N/A'),          # Company details
+                'sector': info.get('sector', 'N/A'),
+                'currency': info.get('currency', 'USD')
+            })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+```
+
+**Data Retrieved Per Request:**
+- **Live Pricing**: `currentPrice`, `previousClose` for immediate trading decisions
+- **Company Information**: `longName`, `industry`, `sector` for investment research
+- **Financial Metrics**: `trailingPE`, `volume`, `dividendYield` for analysis
+- **Metadata**: `currency`, `symbol` for proper formatting and validation
+
+**2. Transaction Pricing Integration**
+```python
+# app.py - Buy stock functionality with live pricing
+def add_stock():
+    # Get current price from Yahoo Finance if not provided
+    if not purchase_price:
+        stock_ticker = yf.Ticker(symbol)
+        info = stock_ticker.info
+        current_price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+        
+        if current_price == 0:
+            # Fallback to recent history if current price unavailable
+            hist = stock_ticker.history(period='1d')
+            if not hist.empty:
+                current_price = float(hist['Close'].iloc[-1])
+        
+        purchase_price = current_price
+```
+
+**Real-Time Features:**
+- **Immediate Pricing**: Every buy/sell uses live market prices
+- **Fallback Systems**: Multiple data sources ensure reliability
+- **Price Validation**: Verifies prices > 0 before transactions
+- **Currency Support**: Handles international stocks and currencies
+
+**3. Historical Data Population for Charts**
+```python
+# app.py - Automatic historical data loading
+def update_stock_closing_prices(symbol):
+    """Fetches closing prices for portfolio performance charts"""
+    price_data = yf.download(symbol, period='1mo')['Close']  # 30 days of data
+    
+    for date, price in price_data.iterrows():
+        date_str = date.strftime('%Y-%m-%d')
+        
+        # Store in Portfolio table for chart generation
+        if not Portfolio.query.filter_by(symbol=symbol, date=date_str).first():
+            db.session.add(Portfolio(
+                symbol=symbol, 
+                date=date_str, 
+                closing_price=price
+            ))
+```
+
+**Chart Data Features:**
+- **30-Day History**: Sufficient data for performance trend analysis
+- **Daily Closing Prices**: Standard format for financial charts
+- **Automatic Population**: New stocks automatically get historical data
+- **Incremental Updates**: Only missing dates are downloaded
+
+#### **Real-Time Data Usage Throughout Application**
+
+**1. Frontend Header Component P&L Calculation**
+```javascript
+// Header.js - Real-time portfolio valuation
+for (const stock of stocksData) {
+    try {
+        // Live price API call for each holding
+        const priceResponse = await fetch(`/api/search/${stock.symbol}`);
+        const priceData = await priceResponse.json();
+        
+        if (priceResponse.ok) {
+            // Use live current price for unrealized P&L
+            totalCurrentValue += priceData.current_price * stock.quantity;
+        } else {
+            // Fallback to stored ACB if live price fails
+            totalCurrentValue += stock.purchase_price * stock.quantity;
+        }
+    } catch {
+        // Error handling ensures UI never breaks
+        totalCurrentValue += stock.purchase_price * stock.quantity;
+    }
+}
+
+// Unrealized P&L = Live Market Value - Average Cost Basis
+const unrealizedPnL = totalCurrentValue - totalInvested;
+```
+
+**2. Buy/Sell Popup Live Pricing**
+```javascript
+// BuySellPopup.js - Stock search with live data
+const handleStockSearch = async (symbol) => {
+    const response = await fetch(`/api/search/${symbol}`);
+    const stockData = await response.json();
+    
+    // Display live price, company info, and financial metrics
+    setCurrentPrice(stockData.current_price);
+    setCompanyName(stockData.name);
+    setStockDetails({
+        sector: stockData.sector,
+        industry: stockData.industry,
+        peRatio: stockData.pe_ratio,
+        volume: stockData.volume
+    });
+};
+```
+
+#### **Error Handling & Reliability**
+
+**Multi-Level Fallback System:**
+```python
+# Primary: Current price from info
+current_price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+
+# Secondary: Recent trading history
+if current_price == 0:
+    hist = stock_ticker.history(period='1d')
+    if not hist.empty:
+        current_price = float(hist['Close'].iloc[-1])
+
+# Tertiary: Error response with helpful message
+else:
+    return jsonify({"error": "Could not retrieve current price"}), 400
+```
+
+**Reliability Features:**
+- **Multiple Data Sources**: `currentPrice`, `regularMarketPrice`, recent history
+- **Graceful Degradation**: App continues working even if Yahoo Finance is down
+- **Error Messaging**: Clear feedback when data is unavailable
+- **Timeout Handling**: Prevents hanging requests from blocking transactions
+
+#### **Performance Optimizations**
+
+**1. Startup Data Loading with Empty Check**
+```python
+# app.py - Only download when stocks exist to prevent errors
+ALL_TIME_STOCKS = [s.symbol for s in Stock.query.all()]
+
+if ALL_TIME_STOCKS:  # Prevents yfinance crash on empty portfolio
+    price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
+    # Process and store historical data
+```
+
+**2. Batch Processing for Multiple Stocks**
+```python
+# Download multiple stocks at once for efficiency
+price_data = yf.download(['AAPL', 'GOOGL', 'MSFT'], period='1mo')
+```
+
+**3. Caching Strategy**
+- **Database Storage**: Historical prices stored locally in Portfolio table
+- **Session Persistence**: Recent price lookups cached during user session
+- **Incremental Updates**: Only missing data downloaded, not full history
+
+#### **Data Quality & Validation**
+
+**Input Validation:**
+```python
+# Symbol validation before API call
+symbol = data["symbol"].upper().strip()
+if not symbol or len(symbol) > 10:
+    return jsonify({"error": "Invalid symbol format"}), 400
+```
+
+**Data Quality Checks:**
+```python
+# Validate returned data before using
+if info and 'symbol' in info and info.get('currentPrice', 0) > 0:
+    # Data is valid, proceed with transaction
+else:
+    return jsonify({'error': 'Stock not found or invalid'}), 404
+```
+
+**Price Validation:**
+- **Positive Prices**: Ensures all prices > 0 before transactions
+- **Symbol Verification**: Confirms returned symbol matches request
+- **Data Completeness**: Validates required fields before processing
+
+#### **Integration Benefits Summary**
+
+**For Users:**
+- **Real-Time Accuracy**: Portfolio values update with live market prices
+- **High Quality Data**: Same data used by major financial platforms
+- **Detailed Information**: Company info and financial data for making decisions
+- **Global Access**: Support for international stocks and currencies
+
+**For Developers:**
+- **Simple Integration**: Single Python library handles all API complexity
+- **No Authentication**: No API keys or tokens to manage
+- **Rich Documentation**: Well-documented library with examples
+- **Active Community**: Large user base and ongoing development
+
+**For Business:**
+- **Cost Effective**: Free access eliminates recurring API costs
+- **Expandable**: Can handle more users without limits
+- **Reliable**: Yahoo Finance stability and uptime
+- **Good Source**: Reliable financial data source
+
 ### **API Integration Patterns**
 
 #### **Frontend-Backend Communication Flow**:
@@ -980,7 +986,7 @@ Yahoo Finance (yfinance)
 - **CORS Enabled**: Frontend-backend communication across different ports
 - **Real-time Data**: Live stock prices via Yahoo Finance integration
 - **Transaction Integrity**: Atomic operations with rollback support
-- **Comprehensive Logging**: Detailed error messages for debugging
+- **Good Logging**: Detailed error messages for debugging
 - **RESTful Design**: Standard HTTP methods and status codes
 - **JSON Communication**: All data exchanged in structured JSON format
 
@@ -1047,11 +1053,11 @@ GET /portfolio/realized-pnl
 }
 ```
 **Features**: Uses FIFO (First In, First Out) method for accurate P&L calculation
-**Used by**: Header component for comprehensive P&L display
+**Used by**: Header component for complete P&L display
 
 ### **API Features:**
 - **CORS Enabled**: Frontend-backend communication from different ports
-- **Error Handling**: Comprehensive error responses with detailed messages
+- **Error Handling**: Good error responses with detailed messages
 - **Input Validation**: Server-side validation for all transactions
 - **Real-time Data**: Live stock prices via Yahoo Finance integration
 - **Transaction Integrity**: Atomic operations for buy/sell with rollback support
@@ -1082,7 +1088,7 @@ def search_stock(query):
         # Create ticker object from user query
         ticker = yf.Ticker(query.upper())
         
-        # Fetch comprehensive stock information
+        # Fetch detailed stock information
         info = ticker.info
         
         # Return structured data to frontend
@@ -1231,7 +1237,7 @@ data = yf.download(symbols, period='1mo')
 
 1. **No API Keys Required**: Free access to Yahoo Finance data
 2. **No Rate Limits**: Suitable for development and moderate usage
-3. **Comprehensive Data**: Rich financial information beyond just prices
+3. **Rich Data**: Detailed financial information beyond just prices
 4. **Easy Implementation**: Simple Python library with minimal setup
 5. **Real-time Updates**: Live market data during trading hours
 6. **Global Coverage**: Supports international stock exchanges
@@ -1245,293 +1251,297 @@ data = yf.download(symbols, period='1mo')
 4. **Data Delays**: May have slight delays during high market volatility
 5. **Network Dependency**: Requires internet connection for live data
 
-## Profit & Loss (P&L) Calculation System
+## How We Calculate Profit and Loss (P&L)
 
-Our portfolio manager uses a sophisticated two-part system to calculate your total profit and loss. This gives you a complete picture of how your investments are performing.
+The app tracks your gains and losses in two ways:
 
-### **What is P&L?**
-P&L stands for "Profit and Loss" - it tells you how much money you've made or lost on your investments. We break this down into two types:
+1. **Realized P&L**: Actual profit/loss from stocks you've sold
+2. **Unrealized P&L**: Current paper gains/losses on stocks you still own
 
-1. **Realized P&L**: Money you've actually made or lost from stocks you've sold
-2. **Unrealized P&L**: Paper gains or losses on stocks you still own
-3. **Total P&L**: Realized + Unrealized = Your complete investment performance
+### Realized P&L - When You Sell Stocks
 
-### **Part 1: Realized P&L Calculation**
+When you sell shares, we use FIFO (First In, First Out) to calculate your profit or loss. This means we match your sale to your oldest purchases first.
 
-**What it means**: This calculates the actual profit or loss from stocks you've already sold. Once you sell a stock, those gains or losses become "real" money in your account.
+**Example:**
+- Day 1: Buy 100 AAPL at $150
+- Day 2: Buy 50 AAPL at $160  
+- Day 3: Sell 75 AAPL at $170
 
-**How we calculate it**: We use something called FIFO (First In, First Out). This means when you sell shares, we match them to your oldest purchases first.
+The 75 shares sold come from your Day 1 purchase (the oldest), so:
+- Profit = ($170 - $150) × 75 = $1,500
 
-#### **Step-by-Step Algorithm**
+We chose FIFO because it's simple, fair, and follows standard accounting practices.
 
-**Step 1: Get All Your Transaction History**
-```
-- Fetch every buy and sell transaction from oldest to newest
-- This gives us a complete timeline of your trading activity
-```
+#### How FIFO Works Step-by-Step (With Code)
 
-**Step 2: Track Your Purchases by Stock**
-```
-For each stock symbol (like AAPL, GOOGL):
-- Create an empty list to track purchases
-- This list will store: [quantity, price] for each buy
-```
+**The Challenge**: When you sell shares, which specific shares are you selling? The ones you bought at $150 or $160?
 
-**Step 3: Process Each Transaction Chronologically**
-```
-For each transaction in order:
-  If it's a BUY:
-    - Add it to the purchase list for that stock
-    - Example: Buy 100 AAPL at $150 → Add [100, $150] to AAPL list
-  
-  If it's a SELL:
-    - Use FIFO to match against oldest purchases
-    - Calculate profit/loss for each match
-    - Remove or reduce the matched purchases
-```
+**Our Solution**: Always sell the oldest shares first (FIFO = First In, First Out)
 
-#### **Real Example: FIFO in Action**
+**Backend Implementation** (in `calculate_realized_pnl()` function):
 
-**Your Trading History:**
-```
-Day 1: Buy 100 AAPL at $150  →  positions['AAPL'] = [{'quantity': 100, 'price': 150}]
-Day 2: Buy 50 AAPL at $160   →  positions['AAPL'] = [{'quantity': 100, 'price': 150}, 
-                                                     {'quantity': 50, 'price': 160}]
-Day 3: Sell 75 AAPL at $170  →  Now we calculate realized P&L...
-```
-
-**FIFO Calculation for the Sale:**
-```
-Step 1: quantity_to_sell = 75, sale_price = $170
-
-Step 2: Look at oldest purchase first
-        oldest_purchase = {'quantity': 100, 'price': 150}
-
-Step 3: Since 100 >= 75, we can cover the entire sale with this purchase
-        realized_pnl = (170 - 150) × 75 = $20 × 75 = $1,500 profit
-        
-Step 4: Update the oldest purchase
-        oldest_purchase becomes {'quantity': 25, 'price': 150}  (100 - 75 = 25 remaining)
-
-Final State: positions['AAPL'] = [{'quantity': 25, 'price': 150}, 
-                                  {'quantity': 50, 'price': 160}]
-Total Realized P&L: $1,500
-```
-
-**Why FIFO?**
-- **Tax Compliance**: Most tax systems use FIFO by default
-- **Fair and Consistent**: Same transactions always give same results
-- **No Gaming**: You can't pick and choose which shares to sell to manipulate P&L
-- **Standard Practice**: Used by professional accounting systems
-
-**Code Implementation:**
 ```python
-while quantity_to_sell > 0 and positions[symbol]:
-    oldest_position = positions[symbol][0]  # Always take oldest first
+def calculate_realized_pnl():
+    # Step 1: Get all transactions in chronological order
+    transactions = db.session.query(Transaction).order_by(Transaction.transaction_date).all()
     
-    if oldest_position['quantity'] <= quantity_to_sell:
-        # Sell entire oldest position
-        realized_pnl = (sale_price - oldest_position['price']) * oldest_position['quantity']
-        total_realized_pnl += realized_pnl
-        quantity_to_sell -= oldest_position['quantity']
-        positions[symbol].pop(0)  # Remove completely sold position
-    else:
-        # Partial sale of oldest position
-        realized_pnl = (sale_price - oldest_position['price']) * quantity_to_sell
-        total_realized_pnl += realized_pnl
-        oldest_position['quantity'] -= quantity_to_sell
-        quantity_to_sell = 0
+    # Step 2: Track purchases for each stock symbol
+    positions = {}  # Will store: {'AAPL': [{'quantity': 100, 'price': 150}, ...]}
+    total_realized_pnl = 0
+    
+    # Step 3: Process each transaction one by one
+    for transaction in transactions:
+        symbol = transaction.symbol
+        
+        if transaction.transaction_type == 'BUY':
+            # Add this purchase to our tracking
+            if symbol not in positions:
+                positions[symbol] = []
+            positions[symbol].append({
+                'quantity': transaction.quantity,
+                'price': transaction.unit_price
+            })
+            
+        elif transaction.transaction_type == 'SELL':
+            # Use FIFO to match against oldest purchases
+            quantity_to_sell = transaction.quantity
+            sale_price = transaction.unit_price
+            
+            # Keep selling from oldest purchases until we've sold everything
+            while quantity_to_sell > 0 and positions[symbol]:
+                oldest_purchase = positions[symbol][0]  # Always take the first (oldest)
+                
+                if oldest_purchase['quantity'] <= quantity_to_sell:
+                    # We can sell this entire old purchase
+                    profit = (sale_price - oldest_purchase['price']) * oldest_purchase['quantity']
+                    total_realized_pnl += profit
+                    quantity_to_sell -= oldest_purchase['quantity']
+                    positions[symbol].pop(0)  # Remove this purchase completely
+                else:
+                    # We only sell part of this old purchase
+                    profit = (sale_price - oldest_purchase['price']) * quantity_to_sell
+                    total_realized_pnl += profit
+                    oldest_purchase['quantity'] -= quantity_to_sell
+                    quantity_to_sell = 0
+    
+    return total_realized_pnl
 ```
 
-### **Part 2: Unrealized P&L Calculation**
+**Real Example - FIFO in Action:**
 
-**What it means**: This calculates the paper gains or losses on stocks you still own. If you sold them right now at current market price, this is what you'd make or lose.
-
-**How we calculate it**: We compare the current market value of your holdings to what you originally paid for them using the Average Cost Basis (ACB) method.
-
-#### **Unrealized vs Realized: Key Differences**
-
-**Database Access Pattern:**
-- **Realized P&L**: Calculated in backend using direct database queries to Transaction table (FIFO method)
-- **Unrealized P&L**: Calculated in frontend using HTTP API calls to multiple endpoints
-
-**Why Different Approaches?**
-- **Realized P&L**: Complex FIFO algorithm requires processing all historical transactions, best done server-side
-- **Unrealized P&L**: Simple calculation using current holdings + live prices, can be done client-side
-
-#### **Step-by-Step Algorithm (Frontend Calculation)**
-
-**Step 1: Get Your Current Holdings from Database**
-```javascript
-// Frontend makes HTTP request to backend
-const stocksResponse = await fetch('http://127.0.0.1:5050/api/stocks');
-const stocksData = await stocksResponse.json();
-
-// Returns: [
-//   {symbol: "AAPL", quantity: 100, purchase_price: 156.67, name: "Apple Inc."},
-//   {symbol: "GOOGL", quantity: 10, purchase_price: 2800.00, name: "Google"}
-// ]
+Let's say you have this purchase history:
+```
+positions['AAPL'] = [
+    {'quantity': 100, 'price': 150},  # Your first purchase
+    {'quantity': 50, 'price': 160}    # Your second purchase
+]
 ```
 
-**Step 2: Calculate Total Amount Invested Using Regular Loop**
-```javascript
-// Using simple for loop instead of reduce() for clarity
-let totalInvested = 0;
-for (const stock of stocksData) {
-    totalInvested += (stock.purchase_price * stock.quantity);
-}
+Now you sell 75 shares at $170:
 
-// Example calculation:
-// AAPL: 156.67 × 100 = $15,667
-// GOOGL: 2800.00 × 10 = $28,000
-// Total Invested: $43,667
+```python
+quantity_to_sell = 75
+sale_price = 170
+
+# First loop iteration:
+oldest_purchase = {'quantity': 100, 'price': 150}
+# Since 100 > 75, we only sell part of this purchase:
+profit = (170 - 150) * 75 = $1,500
+oldest_purchase becomes {'quantity': 25, 'price': 150}  # 100 - 75 = 25 left
+quantity_to_sell = 0  # We're done selling
+
+# Final result:
+positions['AAPL'] = [
+    {'quantity': 25, 'price': 150},   # Leftover from first purchase
+    {'quantity': 50, 'price': 160}    # Second purchase untouched
+]
+Total realized P&L: $1,500
 ```
 
-**Step 3: Get Current Market Prices via Yahoo Finance**
+### Unrealized P&L - Your Current Holdings
+
+This shows how much you'd gain or lose if you sold everything today. We calculate it by comparing current market prices to your average cost per stock.
+
+**How it works:**
+1. Get your current holdings from the database
+2. Fetch live prices from Yahoo Finance API
+3. Calculate: (Current Price × Quantity) - (Your Average Cost × Quantity)
+
+**Example:**
+- You own 100 AAPL shares with average cost of $150
+- Current AAPL price is $175
+- Unrealized P&L = ($175 - $150) × 100 = $2,500 profit
+
+#### Frontend Implementation - Step by Step
+
+**Why Frontend?** Unrealized P&L needs to update constantly as stock prices change, so we calculate it in React where it can refresh in real-time.
+
+**Code Walkthrough** (from Header.js component):
+
 ```javascript
-let totalCurrentValue = 0;
-for (const stock of stocksData) {
+const fetchAccountInfo = async () => {
     try {
-        // Make HTTP request to backend, which calls Yahoo Finance API
-        const priceResponse = await fetch(`http://127.0.0.1:5050/api/search/${stock.symbol}`);
-        const priceData = await priceResponse.json();
+        // Step 1: Get your current stock holdings (with ACB data)
+        const stocksResponse = await fetch('http://127.0.0.1:5050/api/stocks');
+        const stocksData = await stocksResponse.json();
+        // Returns: [{symbol: "AAPL", quantity: 100, unit_price: 150.00}, ...]
         
-        if (priceResponse.ok) {
-            // Use live current price
-            totalCurrentValue += priceData.current_price * stock.quantity;
-        } else {
-            // Fallback to ACB if live price unavailable
-            totalCurrentValue += stock.purchase_price * stock.quantity;
+        // Step 2: Calculate how much you've invested total (using ACB)
+        let totalInvested = 0;
+        for (const stock of stocksData) {
+            totalInvested += (stock.unit_price * stock.quantity);
+            // Example: (150.00 * 100) = $15,000 for AAPL
         }
-    } catch {
-        // Error fallback: use ACB price
-        totalCurrentValue += stock.purchase_price * stock.quantity;
+        
+        // Step 3: Get current market value using live prices
+        let totalCurrentValue = 0;
+        for (const stock of stocksData) {
+            try {
+                // Call our backend, which calls Yahoo Finance
+                const priceResponse = await fetch(`http://127.0.0.1:5050/api/search/${stock.symbol}`);
+                const priceData = await priceResponse.json();
+                
+                if (priceResponse.ok) {
+                    // Use live current price
+                    totalCurrentValue += priceData.current_price * stock.quantity;
+                    // Example: (175.00 * 100) = $17,500 for AAPL
+                } else {
+                    // Fallback if API fails: use your original purchase price
+                    totalCurrentValue += stock.unit_price * stock.quantity;
+                }
+            } catch (error) {
+                // If Yahoo Finance is down, use your purchase price
+                totalCurrentValue += stock.unit_price * stock.quantity;
+            }
+        }
+        
+        // Step 4: Store the results for display
+        setAccountInfo({
+            totalInvested: totalInvested,      // What you paid (ACB method)
+            totalValue: totalCurrentValue,     // What it's worth now
+            // ... other data
+        });
+        
+    } catch (error) {
+        console.error('Error fetching account info:', error);
     }
-}
+};
 
-// Example with live prices:
-// AAPL: $180 × 100 = $18,000 (current market price)
-// GOOGL: $2850 × 10 = $28,500 (current market price)  
-// Total Current Value: $46,500
+// Step 5: Calculate unrealized P&L for display
+const unrealizedPnL = accountInfo.totalValue - accountInfo.totalInvested;
+// Example: $17,500 - $15,000 = $2,500 profit
 ```
 
-**Step 4: Calculate Unrealized P&L**
+**Real Example with Multiple Stocks:**
+
 ```javascript
-const unrealizedPnL = totalCurrentValue - totalInvested;
+// Your current holdings (from database):
+stocksData = [
+    {symbol: "AAPL", quantity: 100, unit_price: 150.00},  // ACB from all purchases
+    {symbol: "GOOGL", quantity: 25, unit_price: 2700.00}, // ACB from all purchases
+    {symbol: "MSFT", quantity: 50, unit_price: 380.00}    // ACB from all purchases
+];
 
-// Example:
-// Unrealized P&L = $46,500 - $43,667 = $2,833 profit
+// Step 2: Calculate total invested
+totalInvested = (150.00 * 100) + (2700.00 * 25) + (380.00 * 50);
+//            = $15,000 + $67,500 + $19,000 = $101,500
+
+// Step 3: Get current prices and calculate current value
+// (Assume live prices: AAPL=$175, GOOGL=$2850, MSFT=$390)
+totalCurrentValue = (175.00 * 100) + (2850.00 * 25) + (390.00 * 50);
+//                = $17,500 + $71,250 + $19,500 = $108,250
+
+// Step 5: Calculate unrealized P&L
+unrealizedPnL = $108,250 - $101,500 = $6,750 profit
+
+// Breakdown by stock:
+// AAPL: ($175 - $150) * 100 = $2,500 profit
+// GOOGL: ($2850 - $2700) * 25 = $3,750 profit  
+// MSFT: ($390 - $380) * 50 = $500 profit
+// Total: $6,750 profit
 ```
 
-#### **Average Cost Basis (ACB) System**
+### Average Cost Basis (ACB) - How We Track Your Purchase Price
 
-**What is ACB?**
-ACB is the weighted average price you paid for each stock, calculated every time you buy more shares.
+When you buy more shares of the same stock at different prices, we calculate a weighted average. This becomes your "cost basis" for that stock.
 
-**When ACB is Calculated (Backend Only):**
+**Simple Example:**
+- Buy 50 AAPL at $140 = $7,000 total
+- Buy 50 AAPL at $160 = $8,000 total
+- Average cost = ($7,000 + $8,000) ÷ 100 shares = $150 per share
+
+This average cost is stored in the database and used for unrealized P&L calculations.
+
+#### Backend ACB Calculation (When You Buy Stocks)
+
+**Location**: `add_stock()` function in app.py
+
 ```python
-# This happens in add_stock() function when buying more of same stock
-if stock:  # Stock already exists in portfolio
-    stock.quantity += quantity
+def add_stock():
+    # ... validation code ...
     
-    # ACB Calculation:
-    total_shares = stock.quantity
-    old_cost = (stock.quantity - quantity) * stock.purchase_price  # Previous total cost
-    new_total_cost = old_cost + total_cost                     # Add new purchase cost
-    stock.purchase_price = new_total_cost / total_shares           # New weighted average
+    # Check if you already own this stock
+    stock = Stock.query.filter_by(symbol=symbol).first()
+    
+    if stock:
+        # You already own this stock - update ACB
+        old_quantity = stock.quantity
+        old_total_cost = old_quantity * stock.unit_price  # What you spent before
+        
+        new_quantity = quantity  # Shares you're buying now
+        new_total_cost = quantity * unit_price  # What you're spending now
+        
+        # Calculate new ACB
+        total_shares = old_quantity + new_quantity
+        total_cost = old_total_cost + new_total_cost
+        new_acb = total_cost / total_shares
+        
+        # Update database
+        stock.quantity = total_shares
+        stock.unit_price = new_acb  # This is your new average cost
+        
+    else:
+        # First time buying this stock - ACB equals purchase price
+        stock = Stock(symbol=symbol, quantity=quantity, unit_price=unit_price, name=name)
+        db.session.add(stock)
 ```
 
-**Real Example: ACB with Multiple Purchases**
+**Real Example - Multiple Purchases:**
 
-**Purchase History:**
-```
-Day 1: Buy 50 AAPL at $140 → ACB = $140.00
-Day 5: Buy 50 AAPL at $160 → ACB = ?
+Let's say you buy AAPL three times:
 
-ACB Calculation:
-old_cost = 50 × $140 = $7,000
-new_cost = 50 × $160 = $8,000
-total_cost = $7,000 + $8,000 = $15,000
-total_shares = 50 + 50 = 100
-new ACB = $15,000 ÷ 100 = $150.00
-```
+```python
+# Purchase 1: Buy 100 AAPL at $140
+# Database: AAPL: quantity=100, unit_price=$140.00
 
-**After Sales (ACB Stays Same):**
-```
-Day 10: Sell 30 shares → ACB remains $150.00
-Remaining: 70 shares at $150.00 ACB
+# Purchase 2: Buy 50 AAPL at $160
+# ACB Calculation:
+old_total_cost = 100 * 140 = $14,000
+new_total_cost = 50 * 160 = $8,000
+total_cost = $14,000 + $8,000 = $22,000
+total_shares = 100 + 50 = 150
+new_acb = $22,000 / 150 = $146.67
 
-Why ACB doesn't change when selling:
-- You're selling from the same "pool" of shares
-- Only quantity decreases, average cost per share stays same
-- ACB only changes when you BUY more at different prices
-```
+# Database: AAPL: quantity=150, unit_price=$146.67
 
-#### **Frontend vs Backend Responsibilities**
+# Purchase 3: Buy 25 AAPL at $180
+# ACB Calculation:
+old_total_cost = 150 * 146.67 = $22,000
+new_total_cost = 25 * 180 = $4,500
+total_cost = $22,000 + $4,500 = $26,500
+total_shares = 150 + 25 = 175
+new_acb = $26,500 / 175 = $151.43
 
-**Backend (Python/Flask):**
-- Calculates and stores ACB when buying stocks
-- Validates transactions and updates database
-- Handles complex FIFO calculations for realized P&L
-- Provides clean API endpoints for frontend consumption
-
-**Frontend (React/JavaScript):**
-- Reads pre-calculated ACB from Stock table
-- Makes HTTP calls to get live stock prices
-- Performs simple unrealized P&L calculations
-- Displays results in real-time to user
-
-**Why This Architecture?**
-- **Security**: Financial calculations happen server-side where they can't be manipulated
-- **Performance**: Heavy database operations handled by backend
-- **Separation**: Frontend focuses on display, backend handles business logic
-- **Data Integrity**: ACB calculated once and stored permanently
-
-#### **Complete Unrealized P&L Example**
-
-**Current Portfolio State:**
-```
-Stock Table (stored ACB from all purchases):
-- AAPL: 100 shares at $150.00 ACB
-- GOOGL: 25 shares at $2750.00 ACB
-- MSFT: 50 shares at $380.00 ACB
+# Final Database: AAPL: quantity=175, unit_price=$151.43
 ```
 
-**Step-by-Step Frontend Calculation:**
-```javascript
-// Step 1: Calculate total invested (using stored ACB)
-let totalInvested = 0;
-totalInvested += (150.00 * 100);   // AAPL: $15,000
-totalInvested += (2750.00 * 25);   // GOOGL: $68,750  
-totalInvested += (380.00 * 50);    // MSFT: $19,000
-// Total Invested: $102,750
+**Important**: ACB only changes when you BUY more shares. When you sell shares, the ACB stays the same because you're selling from the same "pool" of shares at the same average cost.
 
-// Step 2: Get current market values
-let totalCurrentValue = 0;
-totalCurrentValue += (175.00 * 100);  // AAPL at $175: $17,500
-totalCurrentValue += (2800.00 * 25);  // GOOGL at $2800: $70,000
-totalCurrentValue += (390.00 * 50);   // MSFT at $390: $19,500  
-// Total Current Value: $107,000
-
-// Step 3: Calculate unrealized P&L
-const unrealizedPnL = 107000 - 102750; // = $4,250 profit
-
-// Step 4: Display breakdown
-Per Stock P&L:
-- AAPL: ($175-$150) × 100 = $2,500 profit
-- GOOGL: ($2800-$2750) × 25 = $1,250 profit  
-- MSFT: ($390-$380) × 50 = $500 profit
-- Total: $4,250 profit
-```
-
-**Real-Time Updates:**
-- Stock prices update throughout trading day
-- Unrealized P&L recalculates automatically
-- Green/red color coding shows gains/losses
-- Header component refreshes on every transaction
-
-**Why Use ACB Instead of FIFO for Unrealized P&L?**
-- **Simplicity**: Single average price per stock vs tracking every purchase lot
+**Why Use ACB for Unrealized P&L?**
+- **Simplicity**: One price per stock instead of tracking every individual purchase
+- **Real-time Performance**: Fast calculation for live dashboard updates  
+- **Standard Practice**: Most investment apps show unrealized P&L this way
+- **Easy to Understand**: Clear comparison between average cost and current price
 - **Real-Time Performance**: Fast calculation suitable for live updates
 - **Standard Practice**: Most brokerages show unrealized P&L using average cost
 - **User Friendly**: Easier to understand than complex FIFO matching
@@ -1539,7 +1549,7 @@ Per Stock P&L:
 ### **Part 3: Total P&L Calculation - Where Both Methods Come Together**
 
 **Location**: Frontend Header.js component (lines 77-84)
-**Purpose**: Combines both realized (FIFO) and unrealized (ACB) P&L calculations into a single comprehensive performance metric
+**Purpose**: Combines both realized (FIFO) and unrealized (ACB) P&L calculations into a single performance summary
 
 #### **Complete Data Flow and Calculation Process**
 
@@ -1750,7 +1760,7 @@ The React frontend is organized into modular components, each responsible for sp
 - **Layout**: Manages two-column layout (portfolio data + charts)
 
 #### **Header Component**
-- **Purpose**: Real-time portfolio overview and comprehensive financial summary
+- **Purpose**: Real-time portfolio overview and complete financial summary
 - **API Endpoints Called**:
   - `GET /api/account` - Fetches current cash balance
   - `GET /api/stocks` - Gets all owned stocks for portfolio calculations
@@ -1758,7 +1768,7 @@ The React frontend is organized into modular components, each responsible for sp
   - `GET /api/search/{symbol}` - Gets current prices for unrealized P&L calculations
 - **Functionality**: 
   - Displays cash balance, invested amount, total portfolio value
-  - **Comprehensive P&L Display**:
+  - **Complete P&L Display**:
     - **Total P&L**: Combined realized + unrealized gains/losses
     - **Unrealized P&L**: Current gains/losses on held positions
     - **Realized P&L**: Actual profits/losses from completed sales
@@ -1824,9 +1834,9 @@ Header + StockContainer + TransactionContainer → Refresh Display
 ## UI Components
 
 ### Header Component
-- **Real-time portfolio overview** with comprehensive financial metrics
+- **Real-time portfolio overview** with complete financial metrics
 - **Cash balance**, invested amount, total portfolio value
-- **Comprehensive P&L Display**:
+- **Complete P&L Display**:
   - **Total P&L**: Master metric combining all gains/losses
   - **└ Unrealized**: Breakdown showing potential gains on current holdings  
   - **└ Realized**: Breakdown showing actual profits from completed sales
