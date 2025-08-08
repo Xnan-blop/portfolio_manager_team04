@@ -3,22 +3,23 @@ import React, { useState, useEffect, useRef } from "react";
 import { Chart } from "chart.js/auto";
 import './graphContainer.css';
 
-const GraphContainer = () => {
+const GraphContainer = ({ refreshKey }) => {
   const [portfolioData, setPortfolioData] = useState([]);
   
   useEffect(() => {
     const PortfolioData = async () => {
     try {
+      await fetch('http://127.0.0.1:5050/api/stocks/update', { method: 'POST' });
+      
       const response = await fetch('http://127.0.0.1:5050/api/portfolio/value');
       const data = await response.json();
       setPortfolioData(data);
-      console.log(portfolioData);
     } catch (err) {
       console.error('Failure fetching portfolio data for graph');
     }
   };
   PortfolioData();
-  }, []);
+  }, [refreshKey]);
 
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null); // to prevent duplicate chart renders
