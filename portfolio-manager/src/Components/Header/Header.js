@@ -28,10 +28,11 @@ const Header = ({ refreshKey }) => {
             const realizedPnLResponse = await fetch('http://127.0.0.1:5050/api/portfolio/realized-pnl');
             const realizedPnLData = await realizedPnLResponse.json();
             
-            // Calculate total invested amount
-            const totalInvested = stocksData.reduce((sum, stock) => {
-                return sum + (stock.purchase_price * stock.quantity);
-            }, 0);
+            // Calculate total invested amount using simple for loop for clarity
+            let totalInvested = 0;
+            for (const stock of stocksData) {
+                totalInvested += (stock.purchase_price * stock.quantity);
+            }
 
             // Calculate current total value by fetching current prices
             let totalCurrentValue = 0;

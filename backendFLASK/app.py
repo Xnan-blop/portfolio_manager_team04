@@ -21,12 +21,11 @@ with app.app_context():
         db.session.add(account)
         db.session.commit()
 
+    # Get all stocks after ensuring database schema is correct
     ALL_TIME_STOCKS = [s.symbol for s in Stock.query.all()] 
 
-    if not ALL_TIME_STOCKS:
-        # Using GOOGL as placeholder stock
-        price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
-    else:
+    if ALL_TIME_STOCKS:
+        # Only download price data if we have stocks in the database
         price_data = yf.download(ALL_TIME_STOCKS, period='1mo')['Close']
         
         for date, i in price_data.iterrows():
