@@ -1638,14 +1638,89 @@ Database Update → Auto-refresh Trigger
 Header + StockContainer + TransactionContainer → Refresh Display
 ```
 
-#### **GraphContainer Component**
-- **Purpose**: Portfolio visualization and performance charts
-- **API Endpoints Called**:
-  - `GET /api/portfolio/value` - Historical portfolio performance data
-- **Functionality**:
-  - Chart.js integration for data visualization
-  - Portfolio performance over time
-  - Interactive charts and graphs
+## Portfolio Chart Visualization & Performance Tracking
+
+The **GraphContainer** component provides visual analytics of your portfolio performance using Chart.js. It displays your portfolio value over time based on your transaction history.
+
+### **Chart Implementation**
+
+#### **Portfolio Value Over Time Chart**
+- **Chart Type**: Bar chart displaying daily portfolio values
+- **Data Source**: `/api/portfolio/value` endpoint
+- **Y-Axis**: Total portfolio value in USD
+- **X-Axis**: Date range (all dates with transactions)
+- **Current Features**: Basic chart with white bars, responsive design, displays current portfolio value
+
+#### **What Values Are Being Shown**
+
+**1. Daily Portfolio Reconstruction**
+The chart shows your total portfolio value for each trading day by:
+- **Account Balance**: Your available cash at end of each day
+- **Stock Holdings Value**: Market value of all stocks owned that day (using historical closing prices)
+- **Total Portfolio Value**: Account Balance + Stock Holdings Value
+
+**2. Historical Performance Calculation**
+```python
+# Backend calculation in /api/portfolio/value
+For each date with transactions:
+  1. Process all transactions chronologically up to that date
+  2. Calculate running account balance (buys subtract, sells add cash)
+  3. Track stock quantities owned on that date
+  4. Get historical closing price for each stock from Portfolio table
+  5. Calculate: Account Balance + (Stock Quantity × Closing Price) for all holdings
+  6. Return: {"date": date, "total_value": calculated_value}
+```
+
+### **Data Sources & Calculation Method**
+
+#### **Backend Data Processing** (`/api/portfolio/value` endpoint)
+
+The backend reconstructs your portfolio value for each trading day using:
+
+1. **Transaction Processing**: All buy/sell transactions are processed chronologically
+2. **Account Balance Tracking**: Running total of available cash (starts at $100,000)
+3. **Stock Position Tracking**: Quantities owned for each symbol on each date
+4. **Historical Price Integration**: Uses closing prices stored in Portfolio table from Yahoo Finance
+5. **Total Value Calculation**: Account Balance + (Stock Quantities × Historical Closing Prices)
+
+### **Frontend Chart Implementation**
+
+#### **Chart.js Configuration**
+- **Chart Type**: Bar chart with white bars
+- **Data**: Portfolio value for each date with transactions
+- **Responsive Design**: Adapts to container size
+- **API Calls**: 
+  - Calls `/api/stocks/update` to refresh historical prices
+  - Calls `/api/portfolio/value` to get calculated portfolio values
+- **Auto-refresh**: Updates when new transactions occur
+
+### **Chart Features**
+
+#### **What the Chart Shows**
+- **Portfolio Value Over Time**: Total value for each date with transactions
+- **Date Range**: Only dates where actual transactions occurred
+- **Value Components**: Account balance + stock holdings value using historical closing prices
+- **Real-time Updates**: Chart refreshes after buy/sell transactions
+
+#### **Data Sources**
+- **Historical Prices**: Yahoo Finance data stored in Portfolio table (1-month period)
+- **Transaction History**: All buy/sell records from Transactions table
+- **Portfolio Reconstruction**: Backend calculates daily portfolio states chronologically
+
+### **Technical Integration**
+
+**API Flow:**
+```
+GraphContainer Load → POST /api/stocks/update → GET /api/portfolio/value → Display Chart
+```
+
+**Data Format:**
+```json
+[
+  {"date": "2025-08-01", "total_value": 98500.00},
+  {"date": "2025-08-02", "total_value": 99250.00}
+]
+```
 
 ## Important Notes
 
