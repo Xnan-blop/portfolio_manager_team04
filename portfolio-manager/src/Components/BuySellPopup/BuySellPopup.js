@@ -264,7 +264,7 @@ const BuySellPopup = ({ stockSymbol, closePopup, refreshData }) => {
                                     </h4>
                                     <h4>
         
-                                    Real Time Price: ${stockInfo.current_price} {stockInfo.currency}{' '}
+                                    Real Time Price: ${stockInfo.current_price.toFixed(2)} {stockInfo.currency}{' '}
                                     <span style={{ color: stockInfo.current_price - stockInfo.previous_close > 0 ? '#4CAF50' : '#f44336' }}>
                                         ({(stockInfo.current_price - stockInfo.previous_close > 0 ? '+' : '') +
                                         (stockInfo.current_price - stockInfo.previous_close).toFixed(2)})

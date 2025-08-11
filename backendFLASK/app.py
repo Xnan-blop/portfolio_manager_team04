@@ -61,6 +61,15 @@ def update_stock_closing_prices(symbol):
         if not exists:
             db.session.add(Portfolio(symbol = symbol, date = date_str, closing_price = price))    
     
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    exists_today = Portfolio.query.filter_by(symbol=symbol, date=today_str).first()
+    if not exists_today:
+        ticker = yf.Ticker(symbol)
+        info = ticker.info
+        current_price = info.get('currentPrice', info.get('regularMarketPrice', None))
+        if current_price:
+            db.session.add(Portfolio(symbol=symbol, date=today_str, closing_price=current_price))
+
     db.session.commit()
     ALL_TIME_STOCKS.append(symbol)
     return ALL_TIME_STOCKS
@@ -395,7 +404,7 @@ def get_portfolio_performance():
                     stock_quantity_by_symbol[t.symbol] -= t.quantity
 
                 if t.symbol not in symbol_to_entry:
-                    closing_price = None
+                    closing_price = 0
                     for cp in closing_prices_by_date[d]:
                         if cp["symbol"] == t.symbol:
                             closing_price = cp["closing_price"]

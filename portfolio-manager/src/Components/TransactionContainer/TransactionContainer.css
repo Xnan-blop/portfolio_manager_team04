@@ -1,6 +1,6 @@
 .transactions-container {
     width: 100%;
-    flex: 1; /* Transaction History - smaller portion */
+    flex: 2; /* Transaction History - smaller portion */
     background-color: #311b7d;
     display: flex;
     flex-direction: column;
