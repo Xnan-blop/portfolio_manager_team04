@@ -373,8 +373,6 @@ def get_portfolio_performance():
         portfolio = Portfolio.query.all()
         closing_prices_by_date = defaultdict(list)
 
-        stocks = [s.symbol for s in Stock.query.all()]
-
         # organize all closing prices for stocks by date
         for p in portfolio:
             closing_prices_by_date[p.date].append({
@@ -392,16 +390,20 @@ def get_portfolio_performance():
                 portfolio_by_date[d] = deepcopy(previous_day)
             # start with empty if the first day
             else:
-                portfolio_by_date[d] = []
+                portfolio_by_date[d].append({
+                    "Account Balance" : 100000
+                })
             
-            symbol_to_entry = [data["symbol"] for data in portfolio_by_date[d]]
+            symbol_to_entry = [data["symbol"] for data in portfolio_by_date[d][1:]]
 
             for t in transactions_by_date[d]:
                 # update quantity of stock
                 if t.type == "BUY":
                     stock_quantity_by_symbol[t.symbol] += t.quantity
+                    portfolio_by_date[d][0]["Account Balance"] -= t.quantity * t.purchase_price
                 elif t.type == "SELL":
                     stock_quantity_by_symbol[t.symbol] -= t.quantity
+                    portfolio_by_date[d][0]["Account Balance"] += t.quantity * t.purchase_price
 
                 if t.symbol not in symbol_to_entry:
                     closing_price = 0
@@ -416,22 +418,24 @@ def get_portfolio_performance():
                     })
                     symbol_to_entry.append(t.symbol)
                 else:
-                    for stock_dict in portfolio_by_date[d]:
+                    for stock_dict in portfolio_by_date[d][1:]:
                         if stock_dict["symbol"] == t.symbol:
                             stock_dict["quantity"] = stock_quantity_by_symbol[t.symbol]
             
             # Remove any stocks with 0 quantity
-            portfolio_by_date[d] = [
-                entry for entry in portfolio_by_date[d]
+            filtered_stocks = [
+                entry for entry in portfolio_by_date[d][1:]
                 if entry["quantity"] > 0
             ]
+            filtered_stocks.insert(0, portfolio_by_date[d][0])
+            portfolio_by_date[d] = filtered_stocks
             
         # Calculate the total for each day
         portfolio_value_by_day = defaultdict(float)
 
         for d in portfolio_by_date:
-            sum = 0
-            for stock in portfolio_by_date[d]:
+            sum = portfolio_by_date[d][0]["Account Balance"]
+            for stock in portfolio_by_date[d][1:]:
                 sum += stock["quantity"] * stock["closing_price"]
             portfolio_value_by_day[d] = sum
 
