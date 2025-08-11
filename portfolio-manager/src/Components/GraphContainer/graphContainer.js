@@ -108,7 +108,7 @@ const GraphContainer = ({ refreshKey }) => {
   return (
     <div className="graph-container dark-mode">
       <div className="graph-header">
-        <h3>Portfolio Value</h3>
+        <h3>Account Value</h3>
         <p className="net-worth-display">Current Value: {getCurrentNetWorth()}</p>
       </div>
       <div className="graph-canvas">
